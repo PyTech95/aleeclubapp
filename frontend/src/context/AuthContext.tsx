@@ -58,8 +58,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refresh = async () => {
-    const { data } = await api.get('/auth/me');
-    setUser(data);
+    try {
+      const { data } = await api.get('/auth/me');
+      setUser(data);
+    } catch {
+      // Likely 401 after logout / token expired — clear state silently
+      setUser(null);
+    }
   };
 
   return (

@@ -23,8 +23,10 @@ export default function AdminEvents() {
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const { data } = await api.get('/events');
-    setEvents(data);
+    try {
+      const { data } = await api.get('/events');
+      setEvents(data);
+    } catch {}
   };
   useFocusEffect(useCallback(() => { load(); }, []));
 

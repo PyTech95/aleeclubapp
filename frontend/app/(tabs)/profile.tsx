@@ -20,8 +20,8 @@ export default function Profile() {
   const [scoring, setScoring] = useState(false);
 
   useFocusEffect(useCallback(() => {
-    refresh();
-  }, []));
+    if (user) refresh();
+  }, [user]));
 
   const startEdit = () => {
     setForm({
@@ -123,7 +123,7 @@ export default function Profile() {
               <Ionicons name="image" size={14} color={theme.white} />
               <Text style={styles.coverBtnTxt}>Cover</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={logout} style={styles.coverBtn} testID="logout-btn">
+            <TouchableOpacity onPress={async () => { await logout(); router.replace('/'); }} style={styles.coverBtn} testID="logout-btn">
               <Ionicons name="log-out-outline" size={14} color={theme.white} />
               <Text style={styles.coverBtnTxt}>Sign out</Text>
             </TouchableOpacity>

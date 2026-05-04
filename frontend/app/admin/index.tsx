@@ -30,7 +30,7 @@ export default function AdminHome() {
             <Text style={styles.eyebrow}>ADMIN CONSOLE</Text>
             <Text style={styles.h1}>Overview</Text>
           </View>
-          <TouchableOpacity onPress={logout} style={styles.iconBtn} testID="admin-logout">
+          <TouchableOpacity onPress={async () => { await logout(); router.replace('/'); }} style={styles.iconBtn} testID="admin-logout">
             <Ionicons name="log-out-outline" size={20} color={theme.white} />
           </TouchableOpacity>
         </View>

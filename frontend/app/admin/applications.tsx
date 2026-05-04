@@ -20,10 +20,12 @@ export default function AdminApps() {
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const params: any = {};
-    if (filter !== 'all') params.status = filter;
-    const { data } = await api.get('/applications', { params });
-    setApps(data);
+    try {
+      const params: any = {};
+      if (filter !== 'all') params.status = filter;
+      const { data } = await api.get('/applications', { params });
+      setApps(data);
+    } catch {}
   };
   useFocusEffect(useCallback(() => { load(); }, [filter]));
 
