@@ -1,0 +1,110 @@
+{
+  "theme": {
+    "mode": "dark",
+    "archetype": "5 (Jewel & Luxury)",
+    "description": "Premium luxury fashion and pageant app. Uses deep midnight blacks with gold metallic accents, high-contrast imagery, and large cinematic hero banners inspired by Vogue and Netflix UI."
+  },
+  "colors": {
+    "background": {
+      "default": "#050505",
+      "paper": "#0A0A0A",
+      "glass": "rgba(20, 20, 20, 0.6)"
+    },
+    "primary": {
+      "main": "#D4AF37",
+      "light": "#F3E5AB",
+      "dark": "#996515",
+      "contrastText": "#000000"
+    },
+    "secondary": {
+      "main": "#EAEAEA",
+      "contrastText": "#000000"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA",
+      "disabled": "#52525B"
+    },
+    "border": {
+      "default": "rgba(255, 255, 255, 0.1)",
+      "gold": "rgba(212, 175, 55, 0.3)"
+    }
+  },
+  "typography": {
+    "fontFamilies": {
+      "heading": "Cormorant Garamond, Playfair Display, serif",
+      "body": "Inter, Helvetica Neue, sans-serif",
+      "accent": "Cinzel, serif"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl font-serif tracking-tight text-white",
+      "h2": "text-2xl sm:text-3xl font-serif tracking-tight text-white",
+      "h3": "text-xl sm:text-2xl font-serif text-white",
+      "body": "text-base font-sans text-gray-300",
+      "caption": "text-sm font-sans text-gray-400 uppercase tracking-widest"
+    }
+  },
+  "layout": {
+    "spacing": "Generous spacing. Use p-6 to p-8 for cards to create breathing room.",
+    "cards": "Netflix-style minimal cards. No generic white drop shadows. Use subtle 1px border border-white/10 and light top highlight.",
+    "hero": "Vogue/Netflix style large hero banners covering 70-80vh on mobile. Uses gradient overlay (bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent).",
+    "glassmorphism": "backdrop-blur-xl bg-white/5 border border-white/10."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-gradient-to-r from-[#D4AF37] to-[#B5952F] text-black font-semibold rounded-full px-8 py-4 shadow-[0_0_15px_rgba(212,175,55,0.3)]",
+      "secondary": "bg-transparent border border-white/20 text-white rounded-full px-8 py-4 backdrop-blur-md"
+    },
+    "inputs": {
+      "default": "bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
+    },
+    "bottomNav": {
+      "container": "absolute bottom-0 w-full backdrop-blur-2xl bg-[#050505]/80 border-t border-white/10 pb-safe pt-2",
+      "activeTab": "text-[#D4AF37] shadow-[0_-2px_0_#D4AF37]",
+      "inactiveTab": "text-gray-500"
+    },
+    "statusTracker": {
+      "container": "flex flex-col gap-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-white/10",
+      "stepActive": "flex gap-4 relative z-10",
+      "iconActive": "w-6 h-6 rounded-full bg-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.5)] flex items-center justify-center",
+      "iconInactive": "w-6 h-6 rounded-full bg-[#1A1A1A] border border-white/20 flex items-center justify-center"
+    }
+  },
+  "media": {
+    "hero_banners": [
+      {
+        "url": "https://images.unsplash.com/photo-1761163337557-827da2d40001?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwcnVud2F5JTIwc2hvd3xlbnwwfHx8fDE3Nzc4ODA2OTZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Fashion runway show, perfect for main event listing hero.",
+        "category": "hero"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1761437855598-011cf89b2ad4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHxibGFjayUyMGFuZCUyMGdvbGQlMjBsdXh1cnklMjB0ZXh0dXJlfGVufDB8fHx8MTc3Nzg4MDcxNXww&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract golden metallic curves on black background, use for profile headers or premium certificate background.",
+        "category": "background"
+      }
+    ],
+    "portfolios": [
+      {
+        "url": "https://images.unsplash.com/photo-1575354196644-9de51010f481?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwbW9kZWwlMjBwb3J0cmFpdCUyMGJsYWNrJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3Nzc4ODA2OTZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Woman in black coat. Ideal for talent portfolio mockups.",
+        "category": "portrait"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1673830719127-db64dcf68c4f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwbW9kZWwlMjBwb3J0cmFpdCUyMGJsYWNrJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3Nzc4ODA2OTZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Man in suit portrait. Ideal for talent portfolio mockups.",
+        "category": "portrait"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Always use 'data-testid' attributes for all interactive components and forms (e.g., data-testid='login-submit-button').",
+    "Use Tailwind classes for styling within Expo NativeWind. Focus strictly on .js files (no .tsx).",
+    "Implement smooth transitions using React Native Reanimated or standard Animated API for mobile to mimic Netflix-like browsing.",
+    "Do not use generic purple or teal gradients. Stick exclusively to the Deep Black (#050505) and Gold (#D4AF37) palette.",
+    "Use high-contrast luxury UI principles: dark background, subtle 1px white/10% borders for cards, and heavy glassmorphism overlays.",
+    "Hero sections must take up significant screen real estate (Netflix style) with strong gradient overlays fading into the black background to make text legible.",
+    "Ensure the bottom navigation reflects a premium feel (glass blur, gold active indicators).",
+    "For the Application Status Tracker timeline: Utilize the specified statusTracker components with a progress stepper featuring gold filled states for completed actions.",
+    "Ensure text hierarchy utilizes the serif font for major headings (Vogue style) and clean sans-serif for body readability."
+  ]
+}
