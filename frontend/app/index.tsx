@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image as ExpoImage } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import GoldButton from '../src/components/GoldButton';
 import { theme } from '../src/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { heroB64 } from '../src/heroImage';
 
 const { height } = Dimensions.get('window');
 
@@ -27,10 +27,12 @@ export default function Welcome() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: heroB64 }}
+      <ExpoImage
+        source={{ uri: 'https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg' }}
         style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        contentFit="cover"
+        contentPosition="top"
+        transition={400}
       />
       <LinearGradient
         colors={['rgba(5,5,5,0.05)', 'rgba(5,5,5,0.2)', 'rgba(5,5,5,0.85)', '#050505']}
@@ -67,7 +69,7 @@ export default function Welcome() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg },
+  container: { flex: 1, backgroundColor: theme.bg, minHeight: height, width: '100%' },
   bg: { flex: 1, width: '100%', height: '100%' },
   overlay: { flex: 1 },
   safe: { flex: 1, justifyContent: 'space-between', paddingHorizontal: 28 },
