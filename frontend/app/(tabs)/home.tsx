@@ -12,14 +12,25 @@ import { theme } from '../../src/theme';
 import { logoB64 } from '../../src/logoImage';
 import GoldButton from '../../src/components/GoldButton';
 
-// Sambita featured highlight (using uploaded artifact as her photo)
+// Sambita Ma'am — Founder/Motivator (NOT a participant)
 const SAMBITA_PHOTO = 'https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg';
-const SAMBITA_VIDEO_URL = 'https://www.youtube.com/results?search_query=alee+club+sambita';
+const SAMBITA_VIDEO_URL = 'https://www.youtube.com/results?search_query=ramp+guru+sambita+bose+alee+club';
+const REALITY_SHOW_URL = 'https://www.youtube.com/results?search_query=alee+club+miss+mr+teen+india+reality+show';
+
+// Star Achievements — Wall of Fame from aleeclub.net
+const STAR_ACHIEVEMENTS = [
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/2661121768210797.jpeg', name: 'Mishty & Raghav', year: 'Miss & Mr Teen India 2025' },
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6259601768210547.png', name: 'Fiona Wilfy Vas', year: 'Miss Teen India 2024' },
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/4611851768210747.png', name: 'Anshul Rawat', year: 'Mr Teen India 2024' },
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6405521768210224.jpg', name: 'Mahee Sood', year: 'Miss Teen India 2023' },
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/8368101768210471.jpg', name: 'Aarab Sharma', year: 'Mr Teen India 2023' },
+  { img: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/1601141768210146.jpg', name: 'Rifkah & Dheeren', year: 'Teen India 2022' },
+];
 
 const MORE_VIDEOS = [
-  { title: 'Pageant Highlights 2025', thumb: 'https://images.unsplash.com/photo-1515364229803-3eb8c44ff147?w=600' },
-  { title: 'Behind the Crown', thumb: 'https://images.unsplash.com/photo-1573497019418-b400bb3ab074?w=600' },
-  { title: 'Walk like a Star', thumb: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600' },
+  { title: 'Pageant Highlights 2025', thumb: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/2661121768210797.jpeg' },
+  { title: 'Behind the Crown', thumb: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6259601768210547.png' },
+  { title: 'Walk like a Star', thumb: 'https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/4611851768210747.png' },
 ];
 
 export default function Home() {
@@ -68,21 +79,25 @@ export default function Home() {
         <Text style={styles.greeting}>{user ? `Welcome, ${user.name?.split(' ')[0] || 'Star'}` : 'Welcome'}</Text>
         <Text style={styles.subGreeting}>Your stage awaits.</Text>
 
-        {/* Sambita feature video */}
+        {/* Sambita Ma'am — Founder & Motivator */}
         <View style={styles.section}>
-          <Text style={styles.eyebrow}>FEATURED · WINNER STORY</Text>
-          <Text style={styles.secTitle}>Sambita's Journey</Text>
+          <Text style={styles.eyebrow}>FOUNDER · RAMP GURU</Text>
+          <Text style={styles.secTitle}>Sambita Bose Ma'am</Text>
           <TouchableOpacity activeOpacity={0.92} style={styles.videoCard} onPress={() => openVideo(SAMBITA_VIDEO_URL)} testID="sambita-video">
             <Image source={{ uri: SAMBITA_PHOTO }} style={StyleSheet.absoluteFill} />
-            <LinearGradient colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.7)']} style={StyleSheet.absoluteFill} />
+            <LinearGradient colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']} style={StyleSheet.absoluteFill} />
             <View style={styles.playWrap}>
               <View style={styles.playBtn}>
                 <Ionicons name="play" size={28} color="#000" />
               </View>
             </View>
             <View style={styles.videoFooter}>
-              <Text style={styles.videoTitle}>Crowning Moment — Miss Teen India</Text>
-              <Text style={styles.videoMeta}>Watch how Sambita rose to the spotlight</Text>
+              <View style={styles.founderBadge}>
+                <Ionicons name="star" size={10} color={theme.gold} />
+                <Text style={styles.founderBadgeTxt}>FOUNDER · OWNER · MOTIVATOR</Text>
+              </View>
+              <Text style={styles.videoTitle}>Conceptualized by Ramp Guru Sambita Bose</Text>
+              <Text style={styles.videoMeta}>Watch the visionary behind Alee Club Miss & Mr Teen India</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.moreBtn} onPress={() => setMoreOpen(true)} testID="more-videos-btn">
@@ -148,6 +163,45 @@ export default function Home() {
             <Text style={styles.hint}>Register first to unlock Track Journey.</Text>
           )}
         </View>
+
+        {/* Watch Reality Show */}
+        <View style={styles.section}>
+          <Text style={styles.eyebrow}>ON YOUTUBE</Text>
+          <Text style={styles.secTitle}>Watch Reality Show</Text>
+          <TouchableOpacity activeOpacity={0.92} style={styles.realityCard} onPress={() => openVideo(REALITY_SHOW_URL)} testID="reality-show-btn">
+            <LinearGradient colors={['#FF0000', '#CC0000']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            <View style={styles.ytIconWrap}>
+              <Ionicons name="logo-youtube" size={40} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.realityTitle}>Miss & Mr Teen India — Reality Show</Text>
+              <Text style={styles.realitySub}>Tap to watch on YouTube</Text>
+            </View>
+            <Ionicons name="open-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Star Achievements */}
+        <View style={styles.section}>
+          <Text style={styles.eyebrow}>HALL OF FAME</Text>
+          <Text style={styles.secTitle}>Star Achievements</Text>
+          <Text style={styles.starsSub}>Past winners and runners-up of Alee Club Miss & Mr Teen India</Text>
+          <View style={styles.starsGrid}>
+            {STAR_ACHIEVEMENTS.map((s, i) => (
+              <TouchableOpacity key={i} style={styles.starCard} activeOpacity={0.85} onPress={() => openVideo(REALITY_SHOW_URL)}>
+                <Image source={{ uri: s.img }} style={StyleSheet.absoluteFill} />
+                <LinearGradient colors={['transparent', 'rgba(0,0,0,0.95)']} style={StyleSheet.absoluteFill} />
+                <View style={styles.starContent}>
+                  <Text style={styles.starName} numberOfLines={1}>{s.name}</Text>
+                  <Text style={styles.starYear} numberOfLines={1}>{s.year}</Text>
+                </View>
+                <View style={styles.starPlay}>
+                  <Ionicons name="play" size={10} color="#000" />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       </ScrollView>
 
       {/* More Videos modal */}
@@ -208,6 +262,19 @@ const styles = StyleSheet.create({
   priceTag: { color: theme.gold, fontSize: 9, letterSpacing: 1.5, fontWeight: '700', borderWidth: 1, borderColor: theme.borderGold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 999 },
   ctaSection: { paddingHorizontal: 24, marginTop: 28 },
   hint: { color: theme.textMuted, fontSize: 12, textAlign: 'center', marginTop: 12 },
+  founderBadge: { flexDirection: 'row', alignSelf: 'flex-start', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, borderWidth: 1, borderColor: theme.borderGold, backgroundColor: 'rgba(212,175,55,0.18)', marginBottom: 6 },
+  founderBadgeTxt: { color: theme.gold, fontSize: 8, letterSpacing: 1.5, fontWeight: '800' },
+  realityCard: { flexDirection: 'row', alignItems: 'center', padding: 18, borderRadius: 18, gap: 14, overflow: 'hidden' },
+  ytIconWrap: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(0,0,0,0.25)', alignItems: 'center', justifyContent: 'center' },
+  realityTitle: { color: '#fff', fontSize: 16, fontFamily: 'Georgia' },
+  realitySub: { color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 3 },
+  starsSub: { color: theme.textSecondary, fontSize: 13, marginBottom: 14, marginTop: -4 },
+  starsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  starCard: { width: '47%', aspectRatio: 0.78, borderRadius: 14, overflow: 'hidden', backgroundColor: theme.cardBg, borderWidth: 1, borderColor: theme.borderGold },
+  starContent: { position: 'absolute', left: 10, right: 10, bottom: 10 },
+  starName: { color: theme.white, fontSize: 13, fontFamily: 'Georgia' },
+  starYear: { color: theme.gold, fontSize: 9, letterSpacing: 1, marginTop: 2, fontWeight: '700' },
+  starPlay: { position: 'absolute', top: 8, right: 8, width: 22, height: 22, borderRadius: 11, backgroundColor: theme.gold, alignItems: 'center', justifyContent: 'center' },
   modalWrap: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modal: { backgroundColor: theme.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%', borderTopWidth: 1, borderColor: theme.border },
   modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 18, borderBottomColor: theme.border, borderBottomWidth: 1 },
