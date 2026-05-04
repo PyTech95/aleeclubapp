@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image as ExpoImage } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import GoldButton from '../src/components/GoldButton';
 import { theme } from '../src/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { logoB64 } from '../src/logoImage';
 
 const { height } = Dimensions.get('window');
 
@@ -27,41 +27,32 @@ export default function Welcome() {
 
   return (
     <View style={styles.container}>
-      <ExpoImage
-        source={{ uri: 'https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg' }}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        contentPosition="top"
-        transition={400}
-      />
       <LinearGradient
-        colors={['rgba(5,5,5,0.05)', 'rgba(5,5,5,0.2)', 'rgba(5,5,5,0.85)', '#050505']}
-        locations={[0, 0.35, 0.75, 1]}
+        colors={['#000', '#0A0A0A', '#000']}
         style={StyleSheet.absoluteFill}
       />
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.top}>
-          <Text style={styles.brand} testID="brand-title">ALEE CLUB</Text>
+        <View style={styles.center}>
+          <View style={styles.logoWrap}>
+            <Image source={{ uri: logoB64 }} style={styles.logo} resizeMode="contain" />
+          </View>
+
           <Text style={styles.tag}>TALENT · FASHION · FAME</Text>
+
+          <Text style={styles.h1} testID="hero-tagline">
+            Your journey{'\n'}to <Text style={styles.h1Gold}>stardom</Text>{'\n'}begins here
+          </Text>
+
+          <Text style={styles.sub}>
+            Discover. Compete. Shine on India's most prestigious pageant stage.
+          </Text>
         </View>
         <View style={styles.bottom}>
-          <Text style={styles.heroH1}>Where{'\n'}Stars{'\n'}Are Born.</Text>
-          <Text style={styles.heroSub}>
-            India's premier platform to discover beauty pageants, auditions, and unlock your signature journey on the global stage.
-          </Text>
-          <View style={styles.ctas}>
-            <GoldButton
-              title="Begin Your Journey"
-              onPress={() => router.push('/auth/register')}
-              testID="cta-register"
-            />
-            <GoldButton
-              title="I already have an account"
-              variant="ghost"
-              onPress={() => router.push('/auth/login')}
-              testID="cta-login"
-            />
-          </View>
+          <GoldButton
+            title="Start Now"
+            onPress={() => router.push('/auth/login')}
+            testID="cta-start"
+          />
         </View>
       </SafeAreaView>
     </View>
@@ -70,22 +61,23 @@ export default function Welcome() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.bg, minHeight: height, width: '100%' },
-  bg: { flex: 1, width: '100%', height: '100%' },
-  overlay: { flex: 1 },
-  safe: { flex: 1, justifyContent: 'space-between', paddingHorizontal: 28 },
-  top: { paddingTop: 24, alignItems: 'center' },
-  brand: { color: theme.gold, fontSize: 16, letterSpacing: 8, fontWeight: '700' },
-  tag: { color: theme.textMuted, fontSize: 10, letterSpacing: 4, marginTop: 6 },
-  bottom: { paddingBottom: 24 },
-  heroH1: {
-    color: theme.white,
-    fontSize: 68,
-    lineHeight: 72,
-    fontWeight: '300',
-    fontFamily: 'Georgia',
-    letterSpacing: -1,
-    marginBottom: 16,
+  safe: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  logoWrap: {
+    width: 220, height: 110, marginBottom: 28, alignItems: 'center', justifyContent: 'center',
   },
-  heroSub: { color: theme.textSecondary, fontSize: 15, lineHeight: 22, marginBottom: 28, paddingRight: 20 },
-  ctas: { gap: 8 },
+  logo: { width: '100%', height: '100%' },
+  tag: { color: theme.gold, fontSize: 11, letterSpacing: 6, fontWeight: '700', marginBottom: 32 },
+  h1: {
+    color: theme.white,
+    fontSize: 44,
+    lineHeight: 52,
+    fontFamily: 'Georgia',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    letterSpacing: -0.5,
+  },
+  h1Gold: { color: theme.gold, fontFamily: 'Georgia' },
+  sub: { color: theme.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 24, paddingHorizontal: 12, lineHeight: 20 },
+  bottom: { paddingBottom: 24 },
 });

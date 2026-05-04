@@ -180,6 +180,74 @@ class AIScoreReq(BaseModel):
     include_profile: bool = True
 
 
+class PhoneStartReq(BaseModel):
+    phone: str
+    name: Optional[str] = ""
+    city: Optional[str] = ""
+
+
+class PhoneVerifyReq(BaseModel):
+    phone: str
+    code: str
+    name: Optional[str] = ""
+    city: Optional[str] = ""
+
+
+# Mock OTP storage — accepts code "123456" universally for testing
+_OTP_FIXED = "123456"
+
+
+@api.post("/auth/phone/start")
+async def phone_start(body: PhoneStartReq):
+    """Mock OTP send — always returns success. Code is fixed at 123456 for test."""
+    phone = body.phone.strip()
+    if not phone or len(phone) < 6:
+        raise HTTPException(400, "Invalid phone number")
+    return {"sent": True, "test_code": _OTP_FIXED, "message": "OTP sent (test mode: use 123456)"}
+
+
+@api.post("/auth/phone/verify")
+async def phone_verify(body: PhoneVerifyReq):
+    if body.code.strip() != _OTP_FIXED:
+        raise HTTPException(401, "Invalid OTP. Use 123456 for test.")
+    phone = body.phone.strip()
+    # Find or create user keyed by phone (use phone@aleeclub.local as email for uniqueness)
+    pseudo_email = f"{phone}@phone.aleeclub.local"
+    user = await db.users.find_one({"phone": phone})
+    if not user:
+        uid = str(uuid.uuid4())
+        doc = {
+            "id": uid,
+            "name": body.name or f"Star {phone[-4:]}",
+            "email": pseudo_email,
+            "phone": phone,
+            "password_hash": hash_password(uuid.uuid4().hex),
+            "role": "participant",
+            "verified": True,
+            "age": None, "height_cm": None,
+            "city": body.city or "",
+            "category": "", "bio": "", "achievements": "",
+            "profile_photo": "", "cover_photo": "",
+            "portfolio_photos": [], "portfolio_videos": [],
+            "social_instagram": "", "social_youtube": "",
+            "created_at": now_iso(),
+        }
+        await db.users.insert_one(doc)
+        user = doc
+    else:
+        # update name/city if provided
+        upd = {}
+        if body.name and not user.get("name"): upd["name"] = body.name
+        if body.city and not user.get("city"): upd["city"] = body.city
+        if upd:
+            await db.users.update_one({"id": user["id"]}, {"$set": upd})
+            user.update(upd)
+    token = create_token(user["id"], user["role"])
+    user.pop("password_hash", None)
+    user.pop("_id", None)
+    return {"token": token, "user": user}
+
+
 # ---------------- Auth ----------------
 @api.post("/auth/register")
 async def register(body: RegisterReq):
