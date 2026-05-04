@@ -9,7 +9,8 @@ import GoldButton from '../../src/components/GoldButton';
 
 const EMPTY = {
   title: '', subtitle: '', description: '', category: 'miss-teen', city: '', venue: '',
-  min_age: '13', max_age: '30', gender: 'any', fee: '0',
+  min_age: '13', max_age: '30', gender: 'any', fee: '1200',
+  early_bird_fee: '900', early_bird_deadline: '',
   start_date: '', end_date: '', application_deadline: '',
   banner_image: '', eligibility: '', prizes: '', status: 'open',
 };
@@ -32,6 +33,8 @@ export default function AdminEvents() {
     setForm({
       ...e,
       min_age: String(e.min_age), max_age: String(e.max_age), fee: String(Math.round(e.fee / 100)),
+      early_bird_fee: String(Math.round((e.early_bird_fee || 0) / 100)),
+      early_bird_deadline: e.early_bird_deadline || '',
     });
     setEditing(e);
   };
@@ -44,6 +47,7 @@ export default function AdminEvents() {
         min_age: parseInt(form.min_age) || 13,
         max_age: parseInt(form.max_age) || 30,
         fee: (parseInt(form.fee) || 0) * 100,
+        early_bird_fee: (parseInt(form.early_bird_fee) || 0) * 100,
       };
       if (editing?.new) {
         await api.post('/events', payload);
@@ -122,7 +126,9 @@ export default function AdminEvents() {
                 ['title', 'Title'], ['subtitle', 'Subtitle'], ['description', 'Description', true],
                 ['category', 'Category (miss-teen/mr-india/kids/mrs)'], ['city', 'City'], ['venue', 'Venue'],
                 ['min_age', 'Min age', false, 'numeric'], ['max_age', 'Max age', false, 'numeric'],
-                ['gender', 'Gender (male/female/any)'], ['fee', 'Fee (INR)', false, 'numeric'],
+                ['gender', 'Gender (male/female/any)'], ['fee', 'Regular Fee (INR)', false, 'numeric'],
+                ['early_bird_fee', 'Early Bird Fee (INR)', false, 'numeric'],
+                ['early_bird_deadline', 'Early Bird Deadline (YYYY-MM-DD)'],
                 ['start_date', 'Start date (YYYY-MM-DD)'], ['end_date', 'End date (YYYY-MM-DD)'],
                 ['application_deadline', 'Deadline (YYYY-MM-DD)'],
                 ['banner_image', 'Banner image URL'],

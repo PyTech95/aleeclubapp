@@ -131,7 +131,9 @@ class EventCreate(BaseModel):
     min_age: int = 13
     max_age: int = 30
     gender: Literal["male", "female", "any"] = "any"
-    fee: int = 0  # in INR paise
+    fee: int = 0  # in INR paise (regular)
+    early_bird_fee: int = 0  # paise; 0 = no early bird
+    early_bird_deadline: Optional[str] = ""  # ISO date; applies if today <= this date
     start_date: str  # ISO
     end_date: str
     application_deadline: str
@@ -288,6 +290,22 @@ async def delete_event(event_id: str, user: dict = Depends(require_admin)):
 
 
 # ---------------- Applications ----------------
+def _effective_fee(event: dict) -> tuple[int, bool]:
+    """Returns (fee_paise, is_early_bird) based on early_bird_deadline vs today."""
+    eb_fee = int(event.get("early_bird_fee") or 0)
+    eb_deadline = (event.get("early_bird_deadline") or "").strip()
+    regular = int(event.get("fee") or 0)
+    if eb_fee > 0 and eb_deadline:
+        try:
+            deadline_d = datetime.fromisoformat(eb_deadline[:10]).date()
+            today = datetime.now(timezone.utc).date()
+            if today <= deadline_d:
+                return eb_fee, True
+        except Exception:
+            pass
+    return regular, False
+
+
 @api.post("/applications")
 async def create_application(body: ApplicationCreate, user: dict = Depends(get_current_user)):
     event = await db.events.find_one({"id": body.event_id}, {"_id": 0})
@@ -300,6 +318,7 @@ async def create_application(body: ApplicationCreate, user: dict = Depends(get_c
     if existing and not body.is_draft:
         raise HTTPException(400, "You've already applied to this event")
 
+    effective_fee, is_eb = _effective_fee(event)
     aid = str(uuid.uuid4())
     doc = {
         "id": aid,
@@ -320,9 +339,10 @@ async def create_application(body: ApplicationCreate, user: dict = Depends(get_c
         "id_document": body.id_document or "",
         "is_draft": body.is_draft,
         "status": "draft" if body.is_draft else "applied",
-        "payment_status": "pending" if event.get("fee", 0) > 0 else "free",
+        "payment_status": "pending" if effective_fee > 0 else "free",
         "feedback": "",
-        "fee": event.get("fee", 0),
+        "fee": effective_fee,
+        "is_early_bird": is_eb,
         "timeline": [{"step": "applied", "at": now_iso(), "note": "Application submitted"}] if not body.is_draft else [],
         "created_at": now_iso(),
         "updated_at": now_iso(),
@@ -764,6 +784,12 @@ async def startup():
                 {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin"}}
             )
 
+    # migration: ensure all existing events have early-bird fields
+    await db.events.update_many(
+        {"early_bird_fee": {"$exists": False}},
+        {"$set": {"early_bird_fee": 90000, "early_bird_deadline": "2026-03-31", "fee": 120000}}
+    )
+
     # seed sample events if empty
     count = await db.events.count_documents({})
     if count == 0:
@@ -776,7 +802,9 @@ async def startup():
                 "city": "Mumbai",
                 "venue": "Jio World Convention Centre",
                 "min_age": 13, "max_age": 19, "gender": "female",
-                "fee": 149900,  # ₹1499
+                "fee": 120000,  # ₹1200 regular
+                "early_bird_fee": 90000,  # ₹900 early bird
+                "early_bird_deadline": "2026-02-28",
                 "start_date": "2026-04-15",
                 "end_date": "2026-04-20",
                 "application_deadline": "2026-03-15",
@@ -793,7 +821,9 @@ async def startup():
                 "city": "Delhi",
                 "venue": "The Leela Palace",
                 "min_age": 18, "max_age": 30, "gender": "male",
-                "fee": 199900,
+                "fee": 120000,
+                "early_bird_fee": 90000,
+                "early_bird_deadline": "2026-03-15",
                 "start_date": "2026-05-10",
                 "end_date": "2026-05-15",
                 "application_deadline": "2026-04-10",
@@ -810,7 +840,9 @@ async def startup():
                 "city": "Bangalore",
                 "venue": "UB City Mall",
                 "min_age": 6, "max_age": 12, "gender": "any",
-                "fee": 99900,
+                "fee": 120000,
+                "early_bird_fee": 90000,
+                "early_bird_deadline": "2026-04-10",
                 "start_date": "2026-06-05",
                 "end_date": "2026-06-07",
                 "application_deadline": "2026-05-20",
@@ -827,7 +859,9 @@ async def startup():
                 "city": "Mumbai",
                 "venue": "Grand Hyatt",
                 "min_age": 25, "max_age": 45, "gender": "female",
-                "fee": 249900,
+                "fee": 120000,
+                "early_bird_fee": 90000,
+                "early_bird_deadline": "2026-05-20",
                 "start_date": "2026-07-20",
                 "end_date": "2026-07-25",
                 "application_deadline": "2026-06-25",
