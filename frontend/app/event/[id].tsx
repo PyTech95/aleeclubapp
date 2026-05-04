@@ -131,16 +131,3 @@ const styles = StyleSheet.create({
   ebDeadline: { color: theme.textSecondary, fontSize: 11, marginTop: 4 },
   ebSave: { color: theme.gold, fontSize: 12, fontWeight: '600', marginTop: 6 },
 });
- 'center', justifyContent: 'center' },
-  heroContent: { position: 'absolute', left: 24, right: 24, bottom: 20 },
-  eyebrow: { color: theme.gold, fontSize: 11, letterSpacing: 4, fontWeight: '700' },
-  title: { color: theme.white, fontSize: 36, lineHeight: 40, fontFamily: 'Georgia', marginTop: 6 },
-  subtitle: { color: theme.textSecondary, fontSize: 14, marginTop: 6 },
-  body: { padding: 24 },
-  metaRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
-  metaCard: { flex: 1, padding: 14, borderWidth: 1, borderColor: theme.border, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.02)', gap: 4 },
-  metaLabel: { color: theme.textMuted, fontSize: 10, letterSpacing: 1.5, fontWeight: '600', marginTop: 4 },
-  metaVal: { color: theme.white, fontSize: 13, fontWeight: '500', lineHeight: 18 },
-  secTitle: { color: theme.white, fontSize: 22, fontFamily: 'Georgia' },
-  body1: { color: theme.textSecondary, fontSize: 14, lineHeight: 22 },
-});

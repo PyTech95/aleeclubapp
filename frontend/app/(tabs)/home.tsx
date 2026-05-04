@@ -139,9 +139,9 @@ export default function Home() {
           <Text style={styles.secSub}>Stars who began their journey with us</Text>
           <View style={styles.hallRow}>
             {[
+              'https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg',
               'https://images.unsplash.com/photo-1575354196644-9de51010f481?w=400',
               'https://images.unsplash.com/photo-1673830719127-db64dcf68c4f?w=400',
-              'https://images.unsplash.com/photo-1761437855598-011cf89b2ad4?w=400',
             ].map((u, i) => (
               <View key={i} style={styles.hallCard}>
                 <Image source={{ uri: u }} style={styles.hallImg} />

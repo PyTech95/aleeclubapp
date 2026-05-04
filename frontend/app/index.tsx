@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import GoldButton from '../src/components/GoldButton';
 import { theme } from '../src/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { heroB64 } from '../src/heroImage';
 
 const { height } = Dimensions.get('window');
 
@@ -26,43 +27,41 @@ export default function Welcome() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{ uri: 'https://images.unsplash.com/photo-1761163337557-827da2d40001?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwcnVud2F5JTIwc2hvd3xlbnwwfHx8fDE3Nzc4ODA2OTZ8MA&ixlib=rb-4.1.0&q=85' }}
-        style={styles.bg}
+      <Image
+        source={{ uri: heroB64 }}
+        style={StyleSheet.absoluteFill}
         resizeMode="cover"
-      >
-        <LinearGradient
-          colors={['rgba(5,5,5,0.2)', 'rgba(5,5,5,0.6)', 'rgba(5,5,5,0.98)', '#050505']}
-          locations={[0, 0.35, 0.75, 1]}
-          style={styles.overlay}
-        >
-          <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-            <View style={styles.top}>
-              <Text style={styles.brand} testID="brand-title">ALEE CLUB</Text>
-              <Text style={styles.tag}>TALENT · FASHION · FAME</Text>
-            </View>
-            <View style={styles.bottom}>
-              <Text style={styles.heroH1}>Where{'\n'}Stars{'\n'}Are Born.</Text>
-              <Text style={styles.heroSub}>
-                India's premier platform to discover beauty pageants, auditions, and unlock your signature journey on the global stage.
-              </Text>
-              <View style={styles.ctas}>
-                <GoldButton
-                  title="Begin Your Journey"
-                  onPress={() => router.push('/auth/register')}
-                  testID="cta-register"
-                />
-                <GoldButton
-                  title="I already have an account"
-                  variant="ghost"
-                  onPress={() => router.push('/auth/login')}
-                  testID="cta-login"
-                />
-              </View>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </ImageBackground>
+      />
+      <LinearGradient
+        colors={['rgba(5,5,5,0.05)', 'rgba(5,5,5,0.2)', 'rgba(5,5,5,0.85)', '#050505']}
+        locations={[0, 0.35, 0.75, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <View style={styles.top}>
+          <Text style={styles.brand} testID="brand-title">ALEE CLUB</Text>
+          <Text style={styles.tag}>TALENT · FASHION · FAME</Text>
+        </View>
+        <View style={styles.bottom}>
+          <Text style={styles.heroH1}>Where{'\n'}Stars{'\n'}Are Born.</Text>
+          <Text style={styles.heroSub}>
+            India's premier platform to discover beauty pageants, auditions, and unlock your signature journey on the global stage.
+          </Text>
+          <View style={styles.ctas}>
+            <GoldButton
+              title="Begin Your Journey"
+              onPress={() => router.push('/auth/register')}
+              testID="cta-register"
+            />
+            <GoldButton
+              title="I already have an account"
+              variant="ghost"
+              onPress={() => router.push('/auth/login')}
+              testID="cta-login"
+            />
+          </View>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
