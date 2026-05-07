@@ -38,18 +38,21 @@ export default function Home() {
   const { user, logout } = useAuth();
   const [event, setEvent] = useState<any>(null);
   const [myApp, setMyApp] = useState<any>(null);
+  const [settings, setSettings] = useState<any>({ sambita_video_url: '', sambita_photo: '', reality_show_url: '', star_achievements: [] });
   const [refreshing, setRefreshing] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
   const load = async () => {
     try {
-      const [{ data: events }, { data: apps }] = await Promise.all([
+      const [{ data: events }, { data: apps }, { data: s }] = await Promise.all([
         api.get('/events'),
         api.get('/applications/mine').catch(() => ({ data: [] })),
+        api.get('/settings').catch(() => ({ data: {} })),
       ]);
       setEvent(events[0] || null);
       const real = (apps || []).find((a: any) => !a.is_draft && a.event_id === events[0]?.id);
       setMyApp(real || null);
+      setSettings(s || {});
     } catch {}
   };
   useFocusEffect(useCallback(() => { load(); }, []));
@@ -83,8 +86,8 @@ export default function Home() {
         <View style={styles.section}>
           <Text style={styles.eyebrow}>FOUNDER · RAMP GURU</Text>
           <Text style={styles.secTitle}>Sambita Bose Ma'am</Text>
-          <TouchableOpacity activeOpacity={0.92} style={styles.videoCard} onPress={() => openVideo(SAMBITA_VIDEO_URL)} testID="sambita-video">
-            <Image source={{ uri: SAMBITA_PHOTO }} style={StyleSheet.absoluteFill} />
+          <TouchableOpacity activeOpacity={0.92} style={styles.videoCard} onPress={() => settings.sambita_video_url && openVideo(settings.sambita_video_url)} testID="sambita-video">
+            <Image source={{ uri: settings.sambita_photo || 'https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg' }} style={StyleSheet.absoluteFill} />
             <LinearGradient colors={['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.92)']} style={StyleSheet.absoluteFill} />
             <View style={styles.playWrap}>
               <View style={styles.playBtn}>
@@ -168,7 +171,7 @@ export default function Home() {
         <View style={styles.section}>
           <Text style={styles.eyebrow}>ON YOUTUBE</Text>
           <Text style={styles.secTitle}>Watch Reality Show</Text>
-          <TouchableOpacity activeOpacity={0.92} style={styles.realityCard} onPress={() => openVideo(REALITY_SHOW_URL)} testID="reality-show-btn">
+          <TouchableOpacity activeOpacity={0.92} style={styles.realityCard} onPress={() => settings.reality_show_url && openVideo(settings.reality_show_url)} testID="reality-show-btn">
             <LinearGradient colors={['#FF0000', '#CC0000']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
             <View style={styles.ytIconWrap}>
               <Ionicons name="logo-youtube" size={40} color="#fff" />
@@ -187,8 +190,8 @@ export default function Home() {
           <Text style={styles.secTitle}>Star Achievements</Text>
           <Text style={styles.starsSub}>Past winners and runners-up of Alee Club Miss & Mr Teen India</Text>
           <View style={styles.starsGrid}>
-            {STAR_ACHIEVEMENTS.map((s, i) => (
-              <TouchableOpacity key={i} style={styles.starCard} activeOpacity={0.85} onPress={() => openVideo(REALITY_SHOW_URL)}>
+            {(settings.star_achievements || []).map((s: any, i: number) => (
+              <TouchableOpacity key={i} style={styles.starCard} activeOpacity={0.85} onPress={() => openVideo(s.video_url || settings.reality_show_url)}>
                 <Image source={{ uri: s.img }} style={StyleSheet.absoluteFill} />
                 <LinearGradient colors={['transparent', 'rgba(0,0,0,0.95)']} style={StyleSheet.absoluteFill} />
                 <View style={styles.starContent}>
@@ -214,7 +217,7 @@ export default function Home() {
             </View>
             <ScrollView contentContainerStyle={{ padding: 16 }}>
               {MORE_VIDEOS.map((v, i) => (
-                <TouchableOpacity key={i} style={styles.vidRow} onPress={() => openVideo(SAMBITA_VIDEO_URL)}>
+                <TouchableOpacity key={i} style={styles.vidRow} onPress={() => settings.sambita_video_url && openVideo(settings.sambita_video_url)}>
                   <Image source={{ uri: v.thumb }} style={styles.vidThumb} />
                   <View style={styles.vidPlay}><Ionicons name="play" size={14} color="#000" /></View>
                   <View style={{ flex: 1, marginLeft: 12 }}>

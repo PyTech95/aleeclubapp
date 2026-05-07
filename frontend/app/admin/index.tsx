@@ -87,13 +87,16 @@ function StatBox({ label, value, icon }: any) {
   );
 }
 
-function ActionCard({ icon, title, onPress, testID }: any) {
+function ActionCard({ icon, title, sub, onPress, testID }: any) {
   return (
     <TouchableOpacity style={styles.action} onPress={onPress} testID={testID}>
       <View style={styles.actionIcon}>
         <Ionicons name={icon} size={22} color={theme.gold} />
       </View>
-      <Text style={styles.actionTxt}>{title}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.actionTxt}>{title}</Text>
+        {sub ? <Text style={styles.actionSub}>{sub}</Text> : null}
+      </View>
       <Ionicons name="arrow-forward" size={16} color={theme.gold} />
     </TouchableOpacity>
   );
@@ -122,5 +125,6 @@ const styles = StyleSheet.create({
   actions: { padding: 24, paddingTop: 10, gap: 10 },
   action: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: theme.border, backgroundColor: theme.cardBg },
   actionIcon: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,175,55,0.12)' },
-  actionTxt: { flex: 1, color: theme.white, fontSize: 15, fontFamily: 'Georgia' },
+  actionTxt: { color: theme.white, fontSize: 15, fontFamily: 'Georgia' },
+  actionSub: { color: theme.textMuted, fontSize: 11, marginTop: 3 },
 });

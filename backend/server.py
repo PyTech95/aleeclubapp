@@ -796,6 +796,69 @@ async def admin_users(user: dict = Depends(require_admin)):
     return items
 
 
+# ---------------- Site Settings (Sambita / Reality Show / Star Achievements) ----------------
+DEFAULT_SETTINGS = {
+    "sambita_video_url": "https://www.youtube.com/results?search_query=ramp+guru+sambita+bose+alee+club",
+    "sambita_photo": "https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg",
+    "reality_show_url": "https://www.youtube.com/results?search_query=alee+club+miss+mr+teen+india+reality+show",
+    "star_achievements": [
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/2661121768210797.jpeg", "name": "Mishty & Raghav", "year": "Miss & Mr Teen India 2025", "video_url": ""},
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6259601768210547.png", "name": "Fiona Wilfy Vas", "year": "Miss Teen India 2024", "video_url": ""},
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/4611851768210747.png", "name": "Anshul Rawat", "year": "Mr Teen India 2024", "video_url": ""},
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6405521768210224.jpg", "name": "Mahee Sood", "year": "Miss Teen India 2023", "video_url": ""},
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/8368101768210471.jpg", "name": "Aarab Sharma", "year": "Mr Teen India 2023", "video_url": ""},
+        {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/1601141768210146.jpg", "name": "Rifkah & Dheeren", "year": "Teen India 2022", "video_url": ""},
+    ],
+}
+
+
+class SettingsUpdate(BaseModel):
+    sambita_video_url: Optional[str] = None
+    sambita_photo: Optional[str] = None
+    reality_show_url: Optional[str] = None
+    star_achievements: Optional[list] = None
+
+
+@api.get("/settings")
+async def get_settings():
+    s = await db.settings.find_one({"_id": "site"}) or {}
+    out = {**DEFAULT_SETTINGS, **{k: v for k, v in s.items() if k != "_id"}}
+    return out
+
+
+@api.put("/settings")
+async def update_settings(body: SettingsUpdate, user: dict = Depends(require_admin)):
+    upd = {k: v for k, v in body.dict().items() if v is not None}
+    if upd:
+        await db.settings.update_one({"_id": "site"}, {"$set": upd}, upsert=True)
+    s = await db.settings.find_one({"_id": "site"}) or {}
+    return {**DEFAULT_SETTINGS, **{k: v for k, v in s.items() if k != "_id"}}
+
+
+@api.post("/settings/star-achievements/add")
+async def add_star(item: dict, user: dict = Depends(require_admin)):
+    s = await db.settings.find_one({"_id": "site"}) or {}
+    arr = s.get("star_achievements") or DEFAULT_SETTINGS["star_achievements"][:]
+    arr.append({
+        "img": item.get("img", ""),
+        "name": item.get("name", ""),
+        "year": item.get("year", ""),
+        "video_url": item.get("video_url", ""),
+    })
+    await db.settings.update_one({"_id": "site"}, {"$set": {"star_achievements": arr}}, upsert=True)
+    return {"ok": True, "count": len(arr)}
+
+
+@api.delete("/settings/star-achievements/{idx}")
+async def remove_star(idx: int, user: dict = Depends(require_admin)):
+    s = await db.settings.find_one({"_id": "site"}) or {}
+    arr = s.get("star_achievements") or DEFAULT_SETTINGS["star_achievements"][:]
+    if 0 <= idx < len(arr):
+        arr.pop(idx)
+        await db.settings.update_one({"_id": "site"}, {"$set": {"star_achievements": arr}}, upsert=True)
+    return {"ok": True, "count": len(arr)}
+
+
 # ---------------- Health ----------------
 @api.get("/")
 async def root():
