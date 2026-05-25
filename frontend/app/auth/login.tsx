@@ -10,6 +10,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import GoldButton from '../../src/components/GoldButton';
 import LuxInput from '../../src/components/LuxInput';
 import { theme } from '../../src/theme';
+import { startGoogleSignIn, exchangeSessionId } from '../../src/utils/googleAuth';
 
 export default function PhoneAuth() {
   const router = useRouter();
@@ -53,7 +54,26 @@ export default function PhoneAuth() {
   };
 
   const socialMock = (provider: string) => {
-    Alert.alert(`${provider} Sign-In`, `${provider} login coming soon. For now please use phone OTP.`);
+    Alert.alert(`${provider} Sign-In`, `${provider} login coming soon. For now please use phone OTP or Google.`);
+  };
+
+  const googleSignIn = async () => {
+    setErr('');
+    setLoading(true);
+    try {
+      const sid = await startGoogleSignIn();
+      // On web, the browser redirects away and this promise never resolves.
+      // On native, we receive a session_id back here.
+      if (sid) {
+        const data = await exchangeSessionId(sid);
+        setUser(data.user);
+        router.replace(data.user?.role === 'admin' ? '/admin' : '/(tabs)/home');
+      }
+    } catch (e: any) {
+      setErr(e?.response?.data?.detail || e?.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,11 +123,18 @@ export default function PhoneAuth() {
                 <View style={styles.line} /><Text style={styles.dividerTxt}>OR CONTINUE WITH</Text><View style={styles.line} />
               </View>
 
+              <TouchableOpacity
+                style={styles.googleBtn}
+                onPress={googleSignIn}
+                disabled={loading}
+                testID="social-google"
+                activeOpacity={0.85}
+              >
+                <FontAwesome name="google" size={18} color="#fff" />
+                <Text style={styles.googleTxt}>Continue with Google</Text>
+              </TouchableOpacity>
+
               <View style={styles.socials}>
-                <TouchableOpacity style={styles.socBtn} onPress={() => socialMock('Google')} testID="social-google">
-                  <FontAwesome name="google" size={18} color="#fff" />
-                  <Text style={styles.socTxt}>Google</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={styles.socBtn} onPress={() => socialMock('Apple')} testID="social-apple">
                   <FontAwesome name="apple" size={20} color="#fff" />
                   <Text style={styles.socTxt}>Apple</Text>
@@ -158,9 +185,11 @@ const styles = StyleSheet.create({
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 24 },
   line: { flex: 1, height: 1, backgroundColor: theme.border },
   dividerTxt: { color: theme.textMuted, fontSize: 10, letterSpacing: 2, fontWeight: '600' },
-  socials: { flexDirection: 'row', gap: 10 },
+  socials: { flexDirection: 'row', gap: 10, marginTop: 10 },
   socBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: theme.border, backgroundColor: 'rgba(255,255,255,0.04)' },
   socTxt: { color: theme.white, fontSize: 13, fontWeight: '600' },
+  googleBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, paddingVertical: 15, borderRadius: 14, borderWidth: 1, borderColor: theme.borderGold, backgroundColor: 'rgba(212,175,55,0.08)' },
+  googleTxt: { color: theme.white, fontSize: 14, fontWeight: '600', letterSpacing: 0.4 },
   resend: { color: theme.gold, fontSize: 13, letterSpacing: 1, fontWeight: '600' },
   legal: { color: theme.textMuted, fontSize: 11, textAlign: 'center', marginTop: 24, lineHeight: 16 },
 });

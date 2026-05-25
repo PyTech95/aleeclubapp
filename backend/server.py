@@ -197,6 +197,86 @@ class PhoneVerifyReq(BaseModel):
 _OTP_FIXED = "123456"
 
 
+class GoogleSessionReq(BaseModel):
+    session_id: str
+
+
+@api.post("/auth/google/session")
+async def google_session(body: GoogleSessionReq):
+    """
+    Exchange an Emergent OAuth session_id for our app JWT token.
+    Frontend sends the session_id returned by https://auth.emergentagent.com after Google sign-in.
+    We call Emergent's session-data API to verify and fetch the user's profile, then upsert
+    a user record in MongoDB and return our existing { token, user } shape.
+    """
+    sid = (body.session_id or "").strip()
+    if not sid:
+        raise HTTPException(400, "Missing session_id")
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cx:
+            resp = await cx.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": sid},
+            )
+        if resp.status_code != 200:
+            logger.warning(f"Google session-data failed: {resp.status_code} {resp.text[:200]}")
+            raise HTTPException(401, "Invalid or expired Google session")
+        data = resp.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google session lookup error: {e}")
+        raise HTTPException(500, "Failed to verify Google session")
+
+    email = (data.get("email") or "").lower().strip()
+    name = data.get("name") or "Star"
+    picture = data.get("picture") or ""
+    if not email:
+        raise HTTPException(400, "Google profile missing email")
+
+    user = await db.users.find_one({"email": email})
+    if not user:
+        uid = str(uuid.uuid4())
+        doc = {
+            "id": uid,
+            "name": name,
+            "email": email,
+            "phone": "",
+            "password_hash": hash_password(uuid.uuid4().hex),
+            "role": "participant",
+            "verified": True,
+            "age": None, "height_cm": None,
+            "city": "", "category": "", "bio": "", "achievements": "",
+            "profile_photo": picture, "cover_photo": "",
+            "portfolio_photos": [], "portfolio_videos": [],
+            "social_instagram": "", "social_youtube": "",
+            "auth_provider": "google",
+            "referral_code": f"ALEE{uuid.uuid4().hex[:6].upper()}",
+            "referred_by": "",
+            "created_at": now_iso(),
+        }
+        await db.users.insert_one(doc)
+        user = doc
+    else:
+        # If Google profile has picture and user has no profile_photo set, fill it in
+        upd = {}
+        if picture and not user.get("profile_photo"):
+            upd["profile_photo"] = picture
+        if name and not user.get("name"):
+            upd["name"] = name
+        if not user.get("auth_provider"):
+            upd["auth_provider"] = user.get("auth_provider") or "google"
+        if upd:
+            await db.users.update_one({"id": user["id"]}, {"$set": upd})
+            user.update(upd)
+
+    token = create_token(user["id"], user["role"])
+    user.pop("password_hash", None)
+    user.pop("_id", None)
+    return {"token": token, "user": user}
+
+
 @api.post("/auth/phone/start")
 async def phone_start(body: PhoneStartReq):
     """Mock OTP send — always returns success. Code is fixed at 123456 for test."""
@@ -276,6 +356,8 @@ async def register(body: RegisterReq):
         "portfolio_videos": [],
         "social_instagram": "",
         "social_youtube": "",
+        "referral_code": f"ALEE{uuid.uuid4().hex[:6].upper()}",
+        "referred_by": "",
         "created_at": now_iso(),
     }
     await db.users.insert_one(doc)
@@ -796,11 +878,46 @@ async def admin_users(user: dict = Depends(require_admin)):
     return items
 
 
+# Judge: read-only candidates list + score endpoint
+class JudgeScoreReq(BaseModel):
+    application_id: str
+    score: int  # 0-100
+    notes: Optional[str] = ""
+
+
+@api.get("/judge/candidates")
+async def judge_candidates(user: dict = Depends(get_current_user)):
+    if user.get("role") not in ("judge", "admin"):
+        raise HTTPException(403, "Judge access required")
+    items = await db.applications.find(
+        {"is_draft": False, "status": {"$in": ["under_review", "shortlisted", "selected"]}},
+        {"_id": 0, "videos": 0, "id_document": 0}
+    ).sort("created_at", -1).to_list(200)
+    return items
+
+
+@api.post("/judge/score")
+async def judge_score(body: JudgeScoreReq, user: dict = Depends(get_current_user)):
+    if user.get("role") not in ("judge", "admin"):
+        raise HTTPException(403, "Judge access required")
+    score = max(0, min(100, body.score))
+    await db.applications.update_one(
+        {"id": body.application_id},
+        {"$push": {"judge_scores": {
+            "judge_id": user["id"], "judge_name": user.get("name"),
+            "score": score, "notes": body.notes, "at": now_iso(),
+        }}}
+    )
+    return {"ok": True}
+
+
 # ---------------- Site Settings (Sambita / Reality Show / Star Achievements) ----------------
 DEFAULT_SETTINGS = {
     "sambita_video_url": "https://www.youtube.com/results?search_query=ramp+guru+sambita+bose+alee+club",
     "sambita_photo": "https://customer-assets.emergentagent.com/job_glamour-audition/artifacts/yo98546z_hom-abt.jpg",
     "reality_show_url": "https://www.youtube.com/results?search_query=alee+club+miss+mr+teen+india+reality+show",
+    "whatsapp_number": "919876543210",
+    "whatsapp_message": "Hi, I want to know more about Alee Club Miss & Mr Teen India.",
     "star_achievements": [
         {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/2661121768210797.jpeg", "name": "Mishty & Raghav", "year": "Miss & Mr Teen India 2025", "video_url": ""},
         {"img": "https://www.aleeclub.net/assets/upload-a/alee-events/walloffame/6259601768210547.png", "name": "Fiona Wilfy Vas", "year": "Miss Teen India 2024", "video_url": ""},
@@ -817,6 +934,8 @@ class SettingsUpdate(BaseModel):
     sambita_photo: Optional[str] = None
     reality_show_url: Optional[str] = None
     star_achievements: Optional[list] = None
+    whatsapp_number: Optional[str] = None
+    whatsapp_message: Optional[str] = None
 
 
 @api.get("/settings")
@@ -920,6 +1039,13 @@ async def startup():
         {"early_bird_fee": {"$exists": False}},
         {"$set": {"early_bird_fee": 90000, "early_bird_deadline": "2026-03-31", "fee": 120000}}
     )
+
+    # migration: backfill referral_code on existing users
+    async for u in db.users.find({"referral_code": {"$exists": False}}, {"id": 1}):
+        await db.users.update_one(
+            {"id": u["id"]},
+            {"$set": {"referral_code": f"ALEE{uuid.uuid4().hex[:6].upper()}", "referred_by": ""}}
+        )
 
     # seed sample events if empty
     count = await db.events.count_documents({})
