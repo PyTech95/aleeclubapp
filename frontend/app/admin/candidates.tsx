@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { api } from '../../src/api';
 import { theme } from '../../src/theme';
+import { exportToCsv } from '../../src/utils/csv';
 
 const FILTERS = [
   { id: 'all', label: 'All Registered' },
@@ -41,6 +42,22 @@ export default function Candidates() {
 
   const totalPaid = apps.filter((a) => a.payment_status === 'paid').reduce((s, a) => s + (a.fee || 0), 0);
 
+  const onExport = () => {
+    const rows = filtered.map((a) => ({
+      Name: a.full_name,
+      Phone: a.phone,
+      City: a.city,
+      Age: a.age,
+      Gender: a.gender,
+      Event: a.event_title,
+      Status: a.status,
+      Payment: a.payment_status,
+      FeeINR: Math.round((a.fee || 0) / 100),
+      AppliedAt: a.created_at,
+    }));
+    exportToCsv(`alee_candidates_${filter}_${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <SafeAreaView edges={['top']}>
@@ -52,6 +69,9 @@ export default function Candidates() {
             <Text style={styles.eyebrow}>ADMIN</Text>
             <Text style={styles.h1}>Candidates</Text>
           </View>
+          <TouchableOpacity onPress={onExport} style={styles.iconBtn} testID="export-candidates">
+            <Ionicons name="download-outline" size={18} color={theme.gold} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.statsRow}>
@@ -127,6 +147,7 @@ function Stat({ label, value }: any) {
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20 },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: theme.borderGold, alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 3, fontWeight: '700' },
   h1: { color: theme.white, fontSize: 28, fontFamily: 'Georgia', marginTop: 2 },
   statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 12 },

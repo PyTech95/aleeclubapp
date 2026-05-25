@@ -202,25 +202,43 @@ test_plan:
 agent_communication:
     -agent: "main"
     -message: |
-      Added Emergent-managed Google Auth.
-      1) Backend: new POST /api/auth/google/session endpoint that exchanges Emergent session_id
-         for our app JWT (upserts user by email).
-      2) Frontend: "Continue with Google" gold-bordered button on /auth/login. Uses
-         src/utils/googleAuth.ts helper. AuthContext now also parses session_id from window URL
-         on web cold-start.
-      Please test:
-        BACKEND
-        - POST /api/auth/google/session with missing session_id → 400
-        - POST /api/auth/google/session with bogus session_id → 401 with detail
-          "Invalid or expired Google session"
-        - Phone OTP (POST /api/auth/phone/start, /api/auth/phone/verify with code "123456") still
-          issues a JWT and lets us GET /api/auth/me.
-        - Admin login via POST /api/auth/login (admin@aleeclub.com / Admin@123) returns role admin.
-        - POST /api/payments/create-order with a real application_id returns mock=false order
-          (Razorpay test keys in .env) — do NOT call /payments/verify with a fake signature.
-        FRONTEND (web only)
-        - /auth/login renders with "Continue with Google" button visible.
-        - Clicking the button navigates to https://auth.emergentagent.com/?redirect=... (you can
-          just assert location.href changes; don't try to complete Google login).
-        - Phone OTP form still works end-to-end up to /(tabs)/home.
-      Do NOT attempt to complete a real Google login — no test Google account is configured.
+      Added a complete Admin Management Panel.
+      BACKEND new/changed endpoints:
+        - GET    /api/admin/users         (now enriched with application_count + paid_count)
+        - GET    /api/admin/users/{uid}   (full user record + applications + payments + certificates)
+        - PUT    /api/admin/users/{uid}   (name, role, verified, city, phone) — admin only,
+                                            cannot demote self out of admin
+        - DELETE /api/admin/users/{uid}   (cannot self-delete; paid apps preserved with
+                                            user_deleted=true, drafts + notifications purged)
+        - GET    /api/admin/payments      (all transactions enriched with applicant/event,
+                                            totals.paid_paise / paid_count / count, optional
+                                            ?status_q=paid|created filter)
+        - POST   /api/admin/broadcast     ({ title, body, audience: all|participants|paid|selected })
+                                            writes a notification to every matching user
+      FRONTEND new pages (Black & Gold luxury theme preserved):
+        - /admin/users               list + search + role chips + edit modal + CSV export
+        - /admin/user/[id]           full student detail (hero, stats, bio, portfolio,
+                                       applications, payment history, certificates, contact
+                                       buttons — Call / WhatsApp / Email)
+        - /admin/payments            revenue hero card + status chips + CSV export
+        - /admin/candidates          NOW with CSV export button
+        - /admin (dashboard)         expanded Quick Actions to 6 cards: Users, Applications,
+                                       Events, Payments, Candidates, Content & Videos
+        - src/utils/csv.ts           toCsv() + exportToCsv() — web blob download / native alert
+
+      Please test (BACKEND only — frontend already screenshot-verified):
+        - All new admin endpoints (auth required; admin role required)
+        - Self-delete and self-demote guards (admin can't delete or demote themselves)
+        - admin_user_detail returns user + apps + payments + certificates structure
+        - admin_payments returns enriched items with applicant_name + event_title + user_email
+        - admin_broadcast actually inserts notifications for the targeted audience and returns count
+        - Existing endpoints regression: phone OTP, login, Razorpay create-order still work
+      Admin creds: admin@aleeclub.com / Admin@123.
+      Use a fresh phone-OTP user (e.g. +919999900099 code 123456) as a non-admin actor to
+      assert 403 on admin endpoints.
+
+#====================================================================================================
+# Previous agent_communication entries (for context)
+#====================================================================================================
+
+# (Earlier message about Google OAuth integration — see iteration_3.json)

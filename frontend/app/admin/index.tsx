@@ -69,8 +69,12 @@ export default function AdminHome() {
 
         <Text style={styles.secTitle}>Quick Actions</Text>
         <View style={styles.actions}>
-          <ActionCard icon="calendar" title="Manage Events" onPress={() => router.push('/admin/events')} testID="admin-events-btn" />
-          <ActionCard icon="document-text" title="Applications" onPress={() => router.push('/admin/applications')} testID="admin-apps-btn" />
+          <ActionCard icon="people" title="Users / Students" sub={`${stats.users || 0} registered`} onPress={() => router.push('/admin/users')} testID="admin-users-btn" />
+          <ActionCard icon="document-text" title="Applications" sub="Review · approve · reject" onPress={() => router.push('/admin/applications')} testID="admin-apps-btn" />
+          <ActionCard icon="calendar" title="Manage Events" sub="Create or edit events" onPress={() => router.push('/admin/events')} testID="admin-events-btn" />
+          <ActionCard icon="card" title="Payments" sub="Transactions & revenue" onPress={() => router.push('/admin/payments')} testID="admin-payments-btn" />
+          <ActionCard icon="person" title="Candidates" sub="Quick search & filter" onPress={() => router.push('/admin/candidates')} testID="admin-candidates-btn" />
+          <ActionCard icon="image" title="Content & Videos" sub="Founder, reality, achievements" onPress={() => router.push('/admin/content')} testID="admin-content-btn" />
         </View>
       </ScrollView>
     </View>

@@ -874,8 +874,136 @@ async def admin_analytics(user: dict = Depends(require_admin)):
 
 @api.get("/admin/users")
 async def admin_users(user: dict = Depends(require_admin)):
-    items = await db.users.find({}, {"_id": 0, "password_hash": 0, "portfolio_photos": 0, "portfolio_videos": 0, "profile_photo": 0, "cover_photo": 0}).to_list(500)
+    items = await db.users.find(
+        {},
+        {"_id": 0, "password_hash": 0, "portfolio_photos": 0, "portfolio_videos": 0, "cover_photo": 0}
+    ).sort("created_at", -1).to_list(500)
+    # Attach lightweight stats per user
+    for it in items:
+        uid = it.get("id")
+        it["application_count"] = await db.applications.count_documents({"user_id": uid, "is_draft": False})
+        it["paid_count"] = await db.applications.count_documents({"user_id": uid, "payment_status": "paid"})
     return items
+
+
+@api.get("/admin/users/{uid}")
+async def admin_user_detail(uid: str, user: dict = Depends(require_admin)):
+    target = await db.users.find_one({"id": uid}, {"_id": 0, "password_hash": 0})
+    if not target:
+        raise HTTPException(404, "User not found")
+    apps = await db.applications.find({"user_id": uid}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    pays = await db.payments.find({"user_id": uid}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    certs = await db.certificates.find({"user_id": uid}, {"_id": 0}).sort("issued_at", -1).to_list(100)
+    return {"user": target, "applications": apps, "payments": pays, "certificates": certs}
+
+
+class AdminUserUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[Literal["participant", "judge", "admin"]] = None
+    verified: Optional[bool] = None
+    city: Optional[str] = None
+    phone: Optional[str] = None
+
+
+@api.put("/admin/users/{uid}")
+async def admin_update_user(uid: str, body: AdminUserUpdate, admin: dict = Depends(require_admin)):
+    target = await db.users.find_one({"id": uid})
+    if not target:
+        raise HTTPException(404, "User not found")
+    upd = {k: v for k, v in body.dict().items() if v is not None}
+    if not upd:
+        raise HTTPException(400, "Nothing to update")
+    # Prevent demoting yourself out of admin (safety)
+    if uid == admin["id"] and upd.get("role") and upd["role"] != "admin":
+        raise HTTPException(400, "Cannot change your own admin role")
+    await db.users.update_one({"id": uid}, {"$set": upd})
+    updated = await db.users.find_one({"id": uid}, {"_id": 0, "password_hash": 0})
+    return updated
+
+
+@api.delete("/admin/users/{uid}")
+async def admin_delete_user(uid: str, admin: dict = Depends(require_admin)):
+    if uid == admin["id"]:
+        raise HTTPException(400, "Cannot delete your own account")
+    target = await db.users.find_one({"id": uid})
+    if not target:
+        raise HTTPException(404, "User not found")
+    # Soft-cleanup: remove user + their drafts. Keep paid applications for record (mark user_deleted).
+    await db.applications.update_many(
+        {"user_id": uid, "payment_status": "paid"},
+        {"$set": {"user_deleted": True}}
+    )
+    await db.applications.delete_many({"user_id": uid, "payment_status": {"$ne": "paid"}})
+    await db.notifications.delete_many({"user_id": uid})
+    await db.users.delete_one({"id": uid})
+    return {"deleted": True}
+
+
+@api.get("/admin/payments")
+async def admin_payments(admin: dict = Depends(require_admin), status_q: Optional[str] = None):
+    q = {}
+    if status_q:
+        q["status"] = status_q
+    items = await db.payments.find(q, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    # Enrich each with applicant name + event title (single batched lookup)
+    app_ids = list({p.get("application_id") for p in items if p.get("application_id")})
+    user_ids = list({p.get("user_id") for p in items if p.get("user_id")})
+    apps_map = {a["id"]: a async for a in db.applications.find({"id": {"$in": app_ids}}, {"_id": 0, "full_name": 1, "event_title": 1, "id": 1})}
+    users_map = {u["id"]: u async for u in db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "name": 1, "email": 1, "phone": 1, "id": 1})}
+    for p in items:
+        a = apps_map.get(p.get("application_id"))
+        u = users_map.get(p.get("user_id"))
+        p["applicant_name"] = (a or {}).get("full_name") or (u or {}).get("name") or "-"
+        p["event_title"] = (a or {}).get("event_title") or "-"
+        p["user_email"] = (u or {}).get("email", "")
+        p["user_phone"] = (u or {}).get("phone", "")
+    # Totals
+    total_paid = sum((p.get("amount", 0) for p in items if p.get("status") == "paid"))
+    total_created = sum((p.get("amount", 0) for p in items))
+    return {
+        "items": items,
+        "totals": {
+            "count": len(items),
+            "paid_count": sum(1 for p in items if p.get("status") == "paid"),
+            "paid_paise": total_paid,
+            "created_paise": total_created,
+        }
+    }
+
+
+class BroadcastReq(BaseModel):
+    title: str
+    body: str
+    audience: Literal["all", "participants", "paid", "selected"] = "all"
+
+
+@api.post("/admin/broadcast")
+async def admin_broadcast(req: BroadcastReq, admin: dict = Depends(require_admin)):
+    """Send a notification to a target audience. Stored in notifications collection."""
+    if req.audience == "all":
+        users = await db.users.find({}, {"_id": 0, "id": 1}).to_list(2000)
+    elif req.audience == "participants":
+        users = await db.users.find({"role": "participant"}, {"_id": 0, "id": 1}).to_list(2000)
+    elif req.audience == "paid":
+        paid_uids = await db.applications.distinct("user_id", {"payment_status": "paid"})
+        users = [{"id": u} for u in paid_uids]
+    else:  # selected
+        sel_uids = await db.applications.distinct("user_id", {"status": "selected"})
+        users = [{"id": u} for u in sel_uids]
+    if not users:
+        return {"sent": 0}
+    docs = [{
+        "id": str(uuid.uuid4()),
+        "user_id": u["id"],
+        "title": req.title,
+        "body": req.body,
+        "type": "announcement",
+        "read": False,
+        "created_at": now_iso(),
+    } for u in users]
+    if docs:
+        await db.notifications.insert_many(docs)
+    return {"sent": len(docs)}
 
 
 # Judge: read-only candidates list + score endpoint
