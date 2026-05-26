@@ -165,7 +165,7 @@ export default function PhoneAuth() {
             </View>
           )}
 
-          <Text style={styles.legal}>By continuing you agree to Alee Club Terms & Privacy.</Text>
+          <Text style={styles.legal}>By continuing you agree to Alee Club <Text style={styles.legalLinkInline} onPress={() => router.push('/legal/terms')}>Terms</Text> & <Text style={styles.legalLinkInline} onPress={() => router.push('/legal/privacy')}>Privacy</Text>.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -192,4 +192,5 @@ const styles = StyleSheet.create({
   googleTxt: { color: theme.white, fontSize: 14, fontWeight: '600', letterSpacing: 0.4 },
   resend: { color: theme.gold, fontSize: 13, letterSpacing: 1, fontWeight: '600' },
   legal: { color: theme.textMuted, fontSize: 11, textAlign: 'center', marginTop: 24, lineHeight: 16 },
+  legalLinkInline: { color: theme.gold, fontWeight: '600', textDecorationLine: 'underline' },
 });

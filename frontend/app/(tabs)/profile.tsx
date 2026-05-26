@@ -20,8 +20,13 @@ export default function Profile() {
   const [scoring, setScoring] = useState(false);
 
   useFocusEffect(useCallback(() => {
-    if (user) refresh();
-  }, [user]));
+    // Refresh only once when the screen is focused. Do NOT include `user` in
+    // the deps — otherwise every refresh() causes user state to update which
+    // re-creates this callback and triggers refresh() again → infinite loop
+    // and the screen flickers / redirects to root before the user can interact.
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const startEdit = () => {
     setForm({
@@ -224,6 +229,17 @@ export default function Profile() {
                 {user.social_youtube ? <Text style={styles.body1}>YouTube: {user.social_youtube}</Text> : null}
               </Section>
             ) : null}
+
+            {/* Legal */}
+            <View style={styles.legalRow}>
+              <TouchableOpacity onPress={() => router.push('/legal/privacy')} testID="open-privacy" style={styles.legalLink}>
+                <Text style={styles.legalTxt}>Privacy Policy</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalDot}>·</Text>
+              <TouchableOpacity onPress={() => router.push('/legal/terms')} testID="open-terms" style={styles.legalLink}>
+                <Text style={styles.legalTxt}>Terms & Conditions</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <View style={styles.body}>
@@ -321,4 +337,8 @@ const styles = StyleSheet.create({
   portDelete: { position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center' },
   label: { color: theme.textSecondary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
   input: { backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: theme.border, borderRadius: 12, padding: 12, color: theme.white, fontSize: 14 },
+  legalRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 32, paddingBottom: 8 },
+  legalLink: { paddingVertical: 6, paddingHorizontal: 4 },
+  legalTxt: { color: theme.gold, fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
+  legalDot: { color: theme.textMuted, fontSize: 12 },
 });

@@ -82,6 +82,60 @@ export default function Home() {
         <Text style={styles.greeting}>{user ? `Welcome, ${user.name?.split(' ')[0] || 'Star'}` : 'Welcome'}</Text>
         <Text style={styles.subGreeting}>Your stage awaits.</Text>
 
+        {/* My Profile Card — screenshot-friendly */}
+        {user && (
+          <View style={styles.profileSection}>
+            <Text style={styles.eyebrow}>MY ALEE ID CARD</Text>
+            <View style={styles.idCard} testID="home-id-card">
+              <LinearGradient
+                colors={['rgba(212,175,55,0.22)', 'rgba(212,175,55,0.04)', 'rgba(0,0,0,0.6)']}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.idCardHead}>
+                <Image source={{ uri: logoB64 }} style={styles.idCardLogo} resizeMode="contain" />
+                <Text style={styles.idCardBrand}>ALEE CLUB</Text>
+              </View>
+              <View style={styles.idCardBody}>
+                {user.profile_photo ? (
+                  <Image source={{ uri: user.profile_photo }} style={styles.idCardAvatar} />
+                ) : (
+                  <View style={[styles.idCardAvatar, styles.idCardAvatarFallback]}>
+                    <Ionicons name="person" size={42} color={theme.gold} />
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.idCardName} numberOfLines={1}>{user.name || 'Star'}</Text>
+                  <Text style={styles.idCardMeta} numberOfLines={1}>{user.phone || user.email}</Text>
+                  <Text style={styles.idCardMeta} numberOfLines={1}>
+                    {user.city || '—'}{user.age ? ` · Age ${user.age}` : ''}
+                  </Text>
+                  {myApp ? (
+                    <View style={styles.idCardRegPill}>
+                      <Ionicons name="ribbon" size={11} color={theme.gold} />
+                      <Text style={styles.idCardRegTxt}>ALEE-{String(myApp.id).slice(0, 8).toUpperCase()}</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.idCardNoReg}>Not yet registered for an event</Text>
+                  )}
+                </View>
+              </View>
+              <View style={styles.idCardFoot}>
+                <Text style={styles.idCardFootTxt}>TALENT · FASHION · FAME</Text>
+                {myApp ? (
+                  <Text style={styles.idCardStatus}>{(myApp.status || 'applied').replace('_', ' ').toUpperCase()}</Text>
+                ) : null}
+              </View>
+            </View>
+            <View style={styles.idCardActions}>
+              <TouchableOpacity style={styles.idLinkBtn} onPress={() => router.push('/(tabs)/profile')} testID="open-profile-btn">
+                <Ionicons name="person-circle" size={16} color={theme.gold} />
+                <Text style={styles.idLinkBtnTxt}>Open Full Profile</Text>
+              </TouchableOpacity>
+              <Text style={styles.idHint}>📸 Long-press / screenshot this card to share</Text>
+            </View>
+          </View>
+        )}
+
         {/* Sambita Ma'am — Founder & Motivator */}
         <View style={styles.section}>
           <Text style={styles.eyebrow}>FOUNDER · RAMP GURU</Text>
@@ -287,4 +341,36 @@ const styles = StyleSheet.create({
   vidPlay: { position: 'absolute', left: 8, top: 8, width: 100, height: 70, alignItems: 'center', justifyContent: 'center' },
   vidTitle: { color: theme.white, fontSize: 14, fontFamily: 'Georgia' },
   vidMeta: { color: theme.gold, fontSize: 11, marginTop: 4, letterSpacing: 1 },
+  // ===== My Alee ID Card (screenshot-friendly) =====
+  profileSection: { paddingHorizontal: 24, marginTop: 22 },
+  idCard: {
+    borderRadius: 22, padding: 20, marginTop: 8,
+    borderWidth: 1, borderColor: theme.borderGold,
+    overflow: 'hidden', backgroundColor: '#0A0A0A',
+  },
+  idCardHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  idCardLogo: { width: 42, height: 42 },
+  idCardBrand: { color: theme.gold, fontSize: 12, fontWeight: '800', letterSpacing: 4 },
+  idCardBody: { flexDirection: 'row', gap: 14, alignItems: 'center' },
+  idCardAvatar: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: theme.gold, backgroundColor: '#111' },
+  idCardAvatarFallback: { alignItems: 'center', justifyContent: 'center' },
+  idCardName: { color: theme.white, fontSize: 20, fontFamily: 'Georgia' },
+  idCardMeta: { color: theme.textSecondary, fontSize: 12, marginTop: 3 },
+  idCardRegPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start',
+    marginTop: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999,
+    borderWidth: 1, borderColor: theme.borderGold, backgroundColor: 'rgba(212,175,55,0.1)',
+  },
+  idCardRegTxt: { color: theme.gold, fontSize: 11, letterSpacing: 1.5, fontWeight: '700' },
+  idCardNoReg: { color: theme.textMuted, fontSize: 11, marginTop: 8, fontStyle: 'italic' },
+  idCardFoot: {
+    marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: theme.border,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  idCardFootTxt: { color: theme.gold, fontSize: 9, letterSpacing: 3, fontWeight: '700' },
+  idCardStatus: { color: theme.white, fontSize: 10, letterSpacing: 1.5, fontWeight: '700', backgroundColor: 'rgba(212,175,55,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  idCardActions: { marginTop: 12, alignItems: 'center', gap: 8 },
+  idLinkBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: theme.borderGold, backgroundColor: 'rgba(212,175,55,0.06)' },
+  idLinkBtnTxt: { color: theme.gold, fontSize: 12, fontWeight: '600', letterSpacing: 0.8 },
+  idHint: { color: theme.textMuted, fontSize: 10, letterSpacing: 0.5 },
 });
