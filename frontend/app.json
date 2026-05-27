@@ -2,7 +2,7 @@
   "expo": {
     "name": "Alee Club",
     "slug": "alee-club-talent",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "aleeclub",
@@ -13,7 +13,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "net.aleeclub.talent",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "NSCameraUsageDescription": "Capture audition photos and videos",
         "NSPhotoLibraryUsageDescription": "Upload portfolio photos to your profile",
@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "net.aleeclub.talent",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#050505"
