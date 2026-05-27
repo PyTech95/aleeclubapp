@@ -2,7 +2,7 @@
   "expo": {
     "name": "Alee Club",
     "slug": "alee-club-talent",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "aleeclub",
@@ -12,8 +12,8 @@
     "description": "India's premier beauty pageant & talent platform — auditions, portfolios and Miss & Mr Teen India events curated by Alee Club.",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "net.aleeclub.talent",
-      "buildNumber": "2",
+      "bundleIdentifier": "app.emergent.glamouraudition808b6d7e",
+      "buildNumber": "3",
       "infoPlist": {
         "NSCameraUsageDescription": "Capture audition photos and videos",
         "NSPhotoLibraryUsageDescription": "Upload portfolio photos to your profile",
@@ -23,8 +23,8 @@
       }
     },
     "android": {
-      "package": "net.aleeclub.talent",
-      "versionCode": 2,
+      "package": "app.emergent.glamouraudition808b6d7e",
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#050505"
