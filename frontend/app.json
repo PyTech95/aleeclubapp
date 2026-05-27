@@ -1,22 +1,43 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Alee Club",
+    "slug": "alee-club-talent",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
-    "userInterfaceStyle": "automatic",
+    "scheme": "aleeclub",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "primaryColor": "#D4AF37",
+    "description": "India's premier beauty pageant & talent platform — auditions, portfolios and Miss & Mr Teen India events curated by Alee Club.",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "net.aleeclub.talent",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Capture audition photos and videos",
+        "NSPhotoLibraryUsageDescription": "Upload portfolio photos to your profile",
+        "NSPhotoLibraryAddUsageDescription": "Save your Alee Club ID card to photos",
+        "NSMicrophoneUsageDescription": "Record audition videos with audio",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "net.aleeclub.talent",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#050505"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,10 +52,17 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#050505"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Upload portfolio photos to your profile",
+          "cameraPermission": "Capture audition photos and videos"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
