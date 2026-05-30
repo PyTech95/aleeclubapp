@@ -62,7 +62,8 @@
           "photosPermission": "Upload portfolio photos to your profile",
           "cameraPermission": "Capture audition photos and videos"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
