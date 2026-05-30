@@ -96,12 +96,23 @@ class RegisterReq(BaseModel):
     email: EmailStr
     password: str
     phone: Optional[str] = None
+    city: Optional[str] = None
     role: Literal["participant", "admin", "judge"] = "participant"
 
 
 class LoginReq(BaseModel):
     email: EmailStr
     password: str
+
+
+class ForgotPasswordReq(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordReq(BaseModel):
+    email: EmailStr
+    reset_token: str
+    new_password: str
 
 
 class UserUpdate(BaseModel):
@@ -335,6 +346,11 @@ async def register(body: RegisterReq):
     existing = await db.users.find_one({"email": email})
     if existing:
         raise HTTPException(400, "Email already registered")
+    # Also check phone uniqueness if provided
+    if body.phone:
+        existing_phone = await db.users.find_one({"phone": body.phone})
+        if existing_phone:
+            raise HTTPException(400, "Phone number already registered")
     uid = str(uuid.uuid4())
     doc = {
         "id": uid,
@@ -346,7 +362,7 @@ async def register(body: RegisterReq):
         "verified": False,
         "age": None,
         "height_cm": None,
-        "city": "",
+        "city": body.city or "",
         "category": "",
         "bio": "",
         "achievements": "",
@@ -356,6 +372,7 @@ async def register(body: RegisterReq):
         "portfolio_videos": [],
         "social_instagram": "",
         "social_youtube": "",
+        "auth_provider": "email",
         "referral_code": f"ALEE{uuid.uuid4().hex[:6].upper()}",
         "referred_by": "",
         "created_at": now_iso(),
@@ -377,6 +394,48 @@ async def login(body: LoginReq):
     user.pop("password_hash", None)
     user.pop("_id", None)
     return {"token": token, "user": user}
+
+
+@api.post("/auth/forgot-password")
+async def forgot_password(body: ForgotPasswordReq):
+    """
+    Generate a password-reset token for the given email.
+    For MVP we return the token directly in the response (the frontend shows it
+    in a confirmation screen). In production this token should be emailed and
+    the response should always return a generic success message regardless of
+    whether the email exists.
+    """
+    email = body.email.lower()
+    user = await db.users.find_one({"email": email})
+    # Always behave the same way regardless of whether the user exists, to avoid
+    # leaking which emails are registered — but for MVP we surface the token so
+    # the user can complete the reset flow without an email server.
+    if not user:
+        return {"sent": True, "reset_token": None, "message": "If this email is registered, a reset code has been generated."}
+    token = uuid.uuid4().hex[:8].upper()
+    await db.password_resets.update_one(
+        {"email": email},
+        {"$set": {"email": email, "token": token, "created_at": now_iso(), "used": False}},
+        upsert=True,
+    )
+    logger.info(f"[forgot-password] reset_token={token} for {email}")
+    return {"sent": True, "reset_token": token, "message": "Reset code generated. Use it on the reset screen."}
+
+
+@api.post("/auth/reset-password")
+async def reset_password(body: ResetPasswordReq):
+    if len(body.new_password) < 6:
+        raise HTTPException(400, "Password must be at least 6 characters")
+    email = body.email.lower()
+    rec = await db.password_resets.find_one({"email": email, "token": body.reset_token.strip().upper(), "used": False})
+    if not rec:
+        raise HTTPException(400, "Invalid or expired reset code")
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(404, "User not found")
+    await db.users.update_one({"id": user["id"]}, {"$set": {"password_hash": hash_password(body.new_password)}})
+    await db.password_resets.update_one({"_id": rec["_id"]}, {"$set": {"used": True, "used_at": now_iso()}})
+    return {"reset": True, "message": "Password updated. Please log in with your new password."}
 
 
 @api.get("/auth/me")
@@ -1160,6 +1219,40 @@ async def startup():
             await db.users.update_one(
                 {"email": ADMIN_EMAIL},
                 {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin"}}
+            )
+
+    # seed Apple App Review account (so reviewers can sign in without phone OTP)
+    review_email = os.environ.get('APPLE_REVIEW_EMAIL', 'appreview@aleeclub.com')
+    review_password = os.environ.get('APPLE_REVIEW_PASSWORD', 'AleeReview@2026')
+    review_existing = await db.users.find_one({"email": review_email})
+    if not review_existing:
+        await db.users.insert_one({
+            "id": str(uuid.uuid4()),
+            "name": "App Review Tester",
+            "email": review_email,
+            "phone": "",
+            "password_hash": hash_password(review_password),
+            "role": "participant",
+            "verified": True,
+            "age": 21, "height_cm": 170, "city": "Mumbai",
+            "category": "miss-teen",
+            "bio": "Demo account for app reviewers — Apple / Google Play",
+            "achievements": "",
+            "profile_photo": "", "cover_photo": "",
+            "portfolio_photos": [], "portfolio_videos": [],
+            "social_instagram": "", "social_youtube": "",
+            "auth_provider": "email",
+            "referral_code": "ALEEREV001",
+            "referred_by": "",
+            "created_at": now_iso(),
+        })
+        logger.info(f"Seeded App Review account: {review_email} / {review_password}")
+    else:
+        # Always refresh review account password so it remains predictable
+        if not verify_password(review_password, review_existing.get("password_hash", "")):
+            await db.users.update_one(
+                {"email": review_email},
+                {"$set": {"password_hash": hash_password(review_password), "verified": True}}
             )
 
     # migration: ensure all existing events have early-bird fields
