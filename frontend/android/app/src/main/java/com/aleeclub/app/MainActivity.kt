@@ -1,4 +1,4 @@
-package com.aleeclub
+package com.aleeclub.app
 
 import android.os.Build
 import android.os.Bundle
