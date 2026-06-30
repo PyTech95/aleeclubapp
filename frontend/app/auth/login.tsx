@@ -346,7 +346,7 @@ export default function AuthScreen() {
           <Text style={styles.legal}>
             By continuing you agree to Alee Club{' '}
             <Text style={styles.legalLinkInline} onPress={() => router.push('/legal/terms')}>Terms</Text>{' & '}
-            <Text style={styles.legalLinkInline} onPress={() => router.push('/legal/privacy')}>Privacy</Text>.
+            <Text style={styles.legalLinkInline} onPress={() => router.push('/privacy-policy')}>Privacy</Text>.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

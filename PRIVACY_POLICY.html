@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Privacy Policy — Alee Club Talent App</title>
-  <meta name="description" content="Privacy Policy for the Alee Club Talent App — beauty pageants, auditions and talent portfolios." />
+  <title>Privacy Policy — Alee Club</title>
+  <meta name="description" content="Privacy Policy for the Alee Club mobile application — pageants, auditions and talent portfolios." />
   <style>
     :root {
       --bg: #050505;
       --card: #0a0a0a;
       --gold: #d4af37;
       --text: #f5f5f5;
-      --text-secondary: rgba(245, 245, 245, 0.7);
-      --text-muted: rgba(245, 245, 245, 0.45);
+      --text-secondary: rgba(245, 245, 245, 0.74);
+      --text-muted: rgba(245, 245, 245, 0.5);
       --border: rgba(255, 255, 255, 0.08);
+      --border-gold: rgba(212, 175, 55, 0.35);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -24,42 +25,30 @@
       padding: 40px 20px;
       min-height: 100vh;
     }
-    .container { max-width: 760px; margin: 0 auto; }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 32px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
+    .container { max-width: 820px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
     .brand-name { color: var(--gold); font-size: 14px; font-weight: 800; letter-spacing: 4px; }
     .eyebrow { color: var(--gold); font-size: 11px; letter-spacing: 3px; font-weight: 700; margin-bottom: 8px; }
     h1 { font-family: Georgia, "Times New Roman", serif; font-size: 36px; font-weight: 400; margin-bottom: 8px; }
     .effective { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
-    h2 { color: var(--gold); font-family: Georgia, serif; font-size: 18px; font-weight: 400; margin: 32px 0 12px 0; }
-    p { color: var(--text-secondary); margin: 10px 0; font-size: 15px; }
+    .toc { background: rgba(212,175,55,0.04); border: 1px solid var(--border-gold); padding: 18px 22px; border-radius: 14px; margin-bottom: 32px; }
+    .toc-title { color: var(--gold); font-size: 11px; letter-spacing: 2px; font-weight: 700; margin-bottom: 12px; }
+    .toc ol { color: var(--text-secondary); font-size: 14px; line-height: 1.9; padding-left: 18px; }
+    h2 { color: var(--text); font-family: Georgia, serif; font-size: 22px; font-weight: 400; margin: 36px 0 12px 0; display: flex; gap: 12px; align-items: baseline; }
+    .num { color: var(--gold); font-weight: 700; min-width: 26px; }
+    h3 { color: var(--gold); font-size: 13px; font-weight: 700; letter-spacing: 0.5px; margin: 18px 0 4px 0; }
+    p { color: var(--text-secondary); margin: 10px 0; font-size: 15px; line-height: 1.7; }
     ul { list-style: none; padding: 0; }
-    li {
-      color: var(--text-secondary);
-      padding-left: 22px;
-      position: relative;
-      margin: 10px 0;
-      font-size: 15px;
-    }
-    li::before { content: "◆"; color: var(--gold); position: absolute; left: 0; top: 0; font-size: 11px; line-height: 1.7; }
-    strong { color: var(--text); font-weight: 600; }
-    a { color: var(--gold); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 12px;
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      letter-spacing: 1px;
-    }
+    li { color: var(--text-secondary); padding-left: 22px; position: relative; margin: 10px 0; font-size: 15px; line-height: 1.6; }
+    li::before { content: "◆"; color: var(--gold); position: absolute; left: 0; top: 0; font-size: 10px; line-height: 1.9; }
+    strong { color: var(--text); font-weight: 700; }
+    a { color: var(--gold); text-decoration: underline; font-weight: 600; }
+    a:hover { opacity: 0.85; }
+    .contact-card { margin-top: 14px; padding: 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
+    .contact-card p { margin: 8px 0; color: var(--text); }
+    .signoff { margin-top: 40px; padding: 22px; border-radius: 16px; border: 1px solid var(--border-gold); background: rgba(212,175,55,0.06); }
+    .signoff p { color: var(--text); font-style: italic; text-align: center; margin: 0; }
+    .footer { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border); letter-spacing: 1px; }
   </style>
 </head>
 <body>
@@ -68,78 +57,192 @@
       <span class="brand-name">ALEE CLUB</span>
     </div>
 
-    <div class="eyebrow">LEGAL</div>
+    <div class="eyebrow">LEGAL · ALEE CLUB</div>
     <h1>Privacy Policy</h1>
-    <p class="effective">Effective: May 25, 2026</p>
+    <p class="effective">Effective Date: June 18, 2026</p>
 
-    <p>
-      Alee Club ("we", "us", "our") operates the Alee Club Talent App (the "App") which connects participants with beauty pageants, auditions and talent showcases. This Privacy Policy explains what information we collect, how we use it and the choices you have.
-    </p>
+    <div class="toc">
+      <div class="toc-title">QUICK NAVIGATION</div>
+      <ol>
+        <li>Introduction</li>
+        <li>Information We Collect</li>
+        <li>How We Use Your Information</li>
+        <li>Account Information</li>
+        <li>Camera Permission</li>
+        <li>Photos &amp; Media Access</li>
+        <li>Storage Permission</li>
+        <li>Notifications</li>
+        <li>Third-Party Services</li>
+        <li>Data Security</li>
+        <li>Children's Privacy</li>
+        <li>Your Rights</li>
+        <li>Contact Information</li>
+        <li>Changes to This Privacy Policy</li>
+      </ol>
+    </div>
 
-    <h2>1. Information We Collect</h2>
+    <h2><span class="num">1</span> Introduction</h2>
+    <p>Alee Club ("we", "us", "our", or "the Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, store, and protect your information when you use our mobile application <strong>Alee Club</strong> (the "App"), available on Google Play, the Apple App Store, and our website <a href="https://www.aleeclub.net">www.aleeclub.net</a>.</p>
+    <p>By creating an account or using the App, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with this Privacy Policy, please do not use the App.</p>
+    <p>This Privacy Policy is designed to comply with Google Play User Data Policy, Apple App Store Review Guidelines, the Information Technology Act 2000 (India) and applicable data-protection regulations.</p>
+
+    <h2><span class="num">2</span> Information We Collect</h2>
+    <p>We collect the following categories of information:</p>
+
+    <h3>2.1 Personal Information you provide</h3>
     <ul>
-      <li><strong>Account details:</strong> name, phone number, email address, city, age and (optionally) gender — collected when you sign up by phone OTP, Google or email.</li>
-      <li><strong>Profile details:</strong> bio, achievements, height, category and social-media handles you choose to add.</li>
-      <li><strong>Portfolio media:</strong> photos and videos you upload as part of your audition profile.</li>
-      <li><strong>Application data:</strong> events you apply to, application status, judge feedback and certificates issued to you.</li>
-      <li><strong>Payment data:</strong> we use Razorpay to process payments. We store only the payment reference (order id, status, amount) — we do <strong>not</strong> store your card number, UPI PIN or banking credentials.</li>
-      <li><strong>Device data:</strong> basic technical information (device type, OS version, app version) to keep the App reliable.</li>
+      <li><strong>Full Name</strong> — collected during registration</li>
+      <li><strong>Phone Number</strong> — for OTP-based sign-in and event-related communication</li>
+      <li><strong>Email Address</strong> — for email/password sign-in and notifications</li>
+      <li><strong>City</strong> — to show city-specific pageants and events</li>
+      <li><strong>Age &amp; Date of Birth</strong> — to determine pageant-category eligibility</li>
+      <li><strong>Gender</strong> — to display gender-appropriate event categories</li>
+      <li><strong>Profile Information</strong> — bio, achievements, height, social-media handles you choose to add</li>
     </ul>
 
-    <h2>2. How We Use Your Data</h2>
+    <h3>2.2 Content you upload</h3>
     <ul>
-      <li>To create and manage your account.</li>
-      <li>To process pageant applications, payments and award certificates.</li>
-      <li>To allow judges and admins to evaluate your audition.</li>
-      <li>To send you status updates, announcements and important notices about events you registered for.</li>
-      <li>To improve the App, prevent fraud and comply with applicable law.</li>
+      <li><strong>Profile photo</strong> and <strong>cover photo</strong></li>
+      <li><strong>Audition portfolio</strong> — photos and videos</li>
     </ul>
 
-    <h2>3. Sharing of Information</h2>
-    <p>We do not sell your personal data. We share information only with:</p>
+    <h3>2.3 Application &amp; Payment data</h3>
     <ul>
-      <li><strong>Judges and admins</strong> of the Alee Club pageant, strictly for evaluation.</li>
-      <li><strong>Service providers</strong> like Razorpay (payments), Google (OAuth sign-in) and our cloud hosting partners — bound by confidentiality.</li>
-      <li><strong>Government or legal authorities</strong> if required by law or to protect the safety of our users.</li>
+      <li>Events you apply to, application status, judge feedback, certificates issued.</li>
+      <li>Payment reference data (order id, transaction id, amount, payment status) — we do <strong>NOT</strong> store your card number, CVV, UPI PIN or banking credentials. All payments are processed by Razorpay.</li>
     </ul>
 
-    <h2>4. Minors</h2>
-    <p>
-      Many of our events are for children and teens. For participants under 18 years of age, a parent or legal guardian must register and consent on the participant's behalf. We will remove a minor's account on request from the parent or guardian.
-    </p>
-
-    <h2>5. Data Retention</h2>
-    <p>
-      We keep your account and application data while your account is active. After deletion we retain payment receipts for up to 7 years to comply with Indian tax & accounting law. Portfolio media is deleted within 30 days of account deletion.
-    </p>
-
-    <h2>6. Your Rights</h2>
+    <h3>2.4 Automatically collected data</h3>
     <ul>
-      <li><strong>Access</strong> — view your data in the Profile section of the App.</li>
-      <li><strong>Correction</strong> — update your details any time from your profile.</li>
-      <li><strong>Deletion</strong> — write to us at <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a> and we will delete your account within 30 days.</li>
-      <li><strong>Withdraw consent</strong> — sign out and uninstall the App at any time.</li>
+      <li><strong>Device information</strong> — device model, operating system version, app version, device identifiers (used only for crash reports and security).</li>
+      <li><strong>Log data</strong> — IP address, access times, app interaction events (anonymous, used to improve the App).</li>
+      <li>We do <strong>NOT</strong> collect precise GPS location.</li>
     </ul>
 
-    <h2>7. Security</h2>
-    <p>
-      We use industry-standard safeguards — encrypted transport (HTTPS), JWT-based authentication, bcrypt-hashed passwords and access controls. No method of transmission over the internet is 100% secure, but we work hard to protect your data.
-    </p>
+    <h2><span class="num">3</span> How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
+    <ul>
+      <li><strong>Account management</strong> — create, maintain and secure your account</li>
+      <li><strong>Event participation</strong> — process your pageant applications, payments, judging and certificates</li>
+      <li><strong>Communication</strong> — send important notifications about events, application status, results and announcements</li>
+      <li><strong>Customer support</strong> — respond to your queries and resolve issues</li>
+      <li><strong>Personalization</strong> — show events and content relevant to your city, age and category</li>
+      <li><strong>Security &amp; fraud prevention</strong> — detect and prevent fraudulent or unauthorized activity</li>
+      <li><strong>Service improvement</strong> — analyze anonymized usage patterns to improve features</li>
+      <li><strong>Legal compliance</strong> — comply with applicable laws, regulations and lawful requests from authorities</li>
+    </ul>
+    <p>We do <strong>NOT</strong> sell, rent or trade your personal information to third parties for marketing purposes.</p>
 
-    <h2>8. Cookies & Analytics</h2>
-    <p>
-      On the web version, we use first-party local storage to keep you signed in. We do not currently use third-party advertising cookies.
-    </p>
+    <h2><span class="num">4</span> Account Information</h2>
+    <p>When you sign up for Alee Club we create an account associated with your phone number and/or email address. You can sign in using:</p>
+    <ul>
+      <li><strong>Phone OTP</strong> — a one-time password sent to your registered phone number</li>
+      <li><strong>Email &amp; Password</strong> — with bcrypt-hashed password storage</li>
+      <li><strong>Google Sign-In</strong> — via the secure Google OAuth flow</li>
+    </ul>
+    <p>You can update or delete your account information at any time from the Profile section of the App, or by writing to us at <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a>.</p>
 
-    <h2>9. Changes to This Policy</h2>
-    <p>
-      We may update this policy from time to time. Material changes will be highlighted in the App. Continued use of the App after an update means you accept the revised policy.
-    </p>
+    <h2><span class="num">5</span> Camera Permission</h2>
+    <p>The App requests <strong>Camera</strong> access for the following purposes:</p>
+    <ul>
+      <li>Capture profile photos for your audition portfolio</li>
+      <li>Record audition videos directly in the App</li>
+    </ul>
+    <p>Camera access is <strong>only used when you explicitly tap the camera icon</strong>. We never access the camera in the background. You can revoke camera permission at any time through your device's Settings → Apps → Alee Club → Permissions.</p>
 
-    <h2>10. Contact Us</h2>
-    <p>For any privacy questions or requests please contact:</p>
-    <p><strong>Email:</strong> <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a></p>
-    <p><strong>Address:</strong> Alee Club, India</p>
+    <h2><span class="num">6</span> Photos &amp; Media Access</h2>
+    <p>The App requests <strong>Photos</strong> / <strong>Media Library</strong> access (or READ_MEDIA_IMAGES / READ_MEDIA_VIDEO on Android 13+) for:</p>
+    <ul>
+      <li>Selecting existing photos from your gallery to upload to your portfolio</li>
+      <li>Selecting existing videos from your gallery to upload as audition clips</li>
+    </ul>
+    <p>Only the media files you specifically select are uploaded. We do <strong>NOT</strong> scan your entire gallery, and we do NOT access any media without your explicit selection.</p>
+
+    <h2><span class="num">7</span> Storage Permission</h2>
+    <p>On older Android versions (Android 12 and below) the App requests READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE permission for:</p>
+    <ul>
+      <li>Saving your downloaded participation certificates to your device</li>
+      <li>Saving your Alee ID card image when you tap the "Save" button</li>
+      <li>Caching App data for offline access</li>
+    </ul>
+    <p>On Android 13+ this permission is replaced by the scoped READ_MEDIA_IMAGES / READ_MEDIA_VIDEO permissions described in Section 6.</p>
+
+    <h2><span class="num">8</span> Notifications</h2>
+    <p>We use <strong>push notifications and in-app notifications</strong> to keep you informed about:</p>
+    <ul>
+      <li>Application status updates (submitted, shortlisted, selected, etc.)</li>
+      <li>Upcoming pageant deadlines and event reminders</li>
+      <li>Announcements from organizers</li>
+      <li>Important security or account-related alerts</li>
+    </ul>
+    <p>You can disable notifications at any time through your device settings. Doing so will not affect your ability to use the rest of the App, but you may miss time-sensitive updates.</p>
+
+    <h2><span class="num">9</span> Third-Party Services</h2>
+    <p>We share limited information with the following trusted third-party providers, strictly to operate the App:</p>
+    <ul>
+      <li><strong>Razorpay</strong> — to securely process registration-fee payments. Razorpay handles all card / UPI / netbanking data per its own PCI-DSS-compliant privacy policy.</li>
+      <li><strong>Google (Sign-In)</strong> — when you sign in with Google. Subject to <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.</li>
+      <li><strong>YouTube</strong> — embedded videos (founder, reality show, achievements) are served by YouTube and subject to <a href="https://policies.google.com/privacy">YouTube's privacy practices</a>.</li>
+      <li><strong>Anthropic Claude AI</strong> — used for AI-powered profile scoring. We send only the public portions of your profile (name, bio, achievements, category) and never any private credentials or payment data.</li>
+      <li><strong>Cloud hosting partners</strong> — our servers are hosted on industry-standard cloud infrastructure with end-to-end encryption.</li>
+    </ul>
+    <p>We do <strong>NOT</strong> share your data with advertising networks or data brokers.</p>
+
+    <h2><span class="num">10</span> Data Security</h2>
+    <p>We take data security seriously and use industry-standard safeguards:</p>
+    <ul>
+      <li><strong>Encryption in transit</strong> — all data is transmitted over HTTPS / TLS 1.2+</li>
+      <li><strong>Password security</strong> — passwords are hashed using bcrypt with per-user salts</li>
+      <li><strong>Authentication</strong> — JWT bearer tokens with limited validity</li>
+      <li><strong>Access controls</strong> — strict role-based access (participant / judge / admin) on the backend</li>
+      <li><strong>Payment isolation</strong> — no card data is ever stored on our servers</li>
+      <li><strong>Regular audits</strong> — we review our security posture periodically</li>
+    </ul>
+    <p>No method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your information, we cannot guarantee absolute security.</p>
+
+    <h2><span class="num">11</span> Children's Privacy</h2>
+    <p>The App is intended for users aged <strong>13 and above</strong>. Many of our pageants are designed for teens and kids.</p>
+    <ul>
+      <li>Participants under 18 years of age must register with the consent of a parent or legal guardian, who agrees to be bound by these terms on the child's behalf.</li>
+      <li>We do <strong>NOT</strong> knowingly collect personal information from children under 13 without verifiable parental consent.</li>
+      <li>If you are a parent or guardian and believe your child under 13 has provided us with personal information, please contact us at <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a> and we will promptly delete the account.</li>
+    </ul>
+    <p>We comply with COPPA (US Children's Online Privacy Protection Act) principles to the extent applicable.</p>
+
+    <h2><span class="num">12</span> Your Rights</h2>
+    <p>You have the following rights regarding your personal data:</p>
+    <ul>
+      <li><strong>Access</strong> — view your data directly in the Profile section of the App</li>
+      <li><strong>Correction</strong> — update your name, phone, email, city and profile info at any time</li>
+      <li><strong>Deletion</strong> — request deletion of your account by writing to us. We will delete your account within 30 days, except for payment receipts retained for tax compliance.</li>
+      <li><strong>Portability</strong> — request a copy of your data in a machine-readable format</li>
+      <li><strong>Withdraw consent</strong> — sign out of the App and uninstall it at any time</li>
+      <li><strong>Object</strong> — object to certain processing of your data</li>
+      <li><strong>Lodge a complaint</strong> — contact your local data-protection authority if you believe your rights have been violated</li>
+    </ul>
+    <p>To exercise any of these rights please email us at <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a>. We will respond within 30 days.</p>
+
+    <h2><span class="num">13</span> Contact Information</h2>
+    <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data-handling practices, please contact us:</p>
+    <div class="contact-card">
+      <p><strong>Company:</strong> Alee Club</p>
+      <p><strong>Email:</strong> <a href="mailto:aleetrust9@gmail.com">aleetrust9@gmail.com</a></p>
+      <p><strong>Website:</strong> <a href="https://www.aleeclub.net">https://www.aleeclub.net</a></p>
+      <p><strong>Address:</strong> Bhubaneswar, Odisha, India</p>
+    </div>
+
+    <h2><span class="num">14</span> Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or for other operational reasons.</p>
+    <ul>
+      <li>The updated policy will be posted in the App with a revised "Effective Date" at the top.</li>
+      <li>For material changes, we will notify you via in-app notification, email, or a banner on the App at least 7 days before the change takes effect.</li>
+      <li>Continued use of the App after the effective date constitutes acceptance of the updated policy.</li>
+    </ul>
+    <p>We encourage you to review this Privacy Policy periodically to stay informed about how we protect your information.</p>
+
+    <div class="signoff">
+      <p>Thank you for trusting <strong>Alee Club</strong> with your audition journey. Crowns. Cameras. Confidence.</p>
+    </div>
 
     <div class="footer">© 2026 Alee Club. All rights reserved.</div>
   </div>

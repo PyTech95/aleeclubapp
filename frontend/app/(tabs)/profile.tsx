@@ -232,7 +232,7 @@ export default function Profile() {
 
             {/* Legal */}
             <View style={styles.legalRow}>
-              <TouchableOpacity onPress={() => router.push('/legal/privacy')} testID="open-privacy" style={styles.legalLink}>
+              <TouchableOpacity onPress={() => router.push('/privacy-policy')} testID="open-privacy" style={styles.legalLink}>
                 <Text style={styles.legalTxt}>Privacy Policy</Text>
               </TouchableOpacity>
               <Text style={styles.legalDot}>·</Text>
