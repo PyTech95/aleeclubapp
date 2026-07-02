@@ -1,0 +1,40 @@
+{
+  "summary": "Backend-only iteration 6. Verified the /api/admin/users aggregation optimization (N+1 count_documents → single $group aggregation). Wrote 9 focused pytest cases at /app/backend/tests/test_admin_users_aggregation.py — ALL 9/9 PASSED against the public URL. Coverage: (1) Admin login admin@aleeclub.com / Admin@123 → 200, JWT decodes to role='admin', /auth/me confirms. (2) /api/admin/users returns a list where every user has integer application_count and paid_count fields, both >=0, with paid_count<=application_count. (3) Seeded 3 fresh TEST_agg_* users via /auth/register and applied to a real paid event (Miss & Mr Teen India 2026, fee=120000 paise): user A = 1 non-draft + 1 draft + payment /payments/verify(mock=true) → aggregation returned application_count=1, paid_count=1 (drafts correctly excluded, paid correctly counted). User B = 1 non-draft (unpaid) + 1 draft → 1/0. User C = 0 apps → 0/0 (edge case for the aggregation — the $lookup miss branch correctly defaults to 0/0 via counts_map.get()). (4) Regression on GET /api/admin/users/{uid} returned 200 with {user, applications, payments, certificates}, and the non-draft applications count in the detail response matched the aggregation's application_count. 404 for unknown uid. (5) Regression on GET /api/admin/analytics returned 200 with all expected keys (users, events, applications, by_status, revenue_paise) as integers. Note: the review request mentioned '/admin/stats' but the actual endpoint is '/admin/analytics' — tested the real one. (6) Non-admin (participant) hitting /api/admin/users → 403. (7) No MongoDB _id or password_hash leaked in /admin/users response. No 500s in backend logs; response shape is IDENTICAL to the pre-optimization contract.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "review_request note", "issue": "Review request references '/admin/stats' but the actual endpoint in server.py is '/admin/analytics'. Not a bug — just documentation drift. Tested the real endpoint successfully."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_users_aggregation.py",
+    "/app/test_reports/pytest/iteration_6_results.xml"
+  ],
+  "action_items": [
+    "None blocking. The aggregation optimization is correct and preserves the response shape."
+  ],
+  "critical_code_review_comments": [
+    "server.py:934-965 — /admin/users aggregation is well-formed: $match {user_id: {$in: user_ids}} keeps it index-friendly, $group with $cond correctly maps 'is_draft != true' → application_count and 'payment_status == paid' → paid_count. The $ne against True (rather than $eq false) also treats missing is_draft as non-draft, which matches the previous count_documents filter {'is_draft': {'$ne': True}} semantics if that was used — worth confirming. In our tests both non-draft (is_draft=False) and draft (is_draft=True) documents were counted correctly.",
+    "server.py:961-964 — counts_map.get(it.get('id'), {}) with .get(..., 0) fallback correctly handles the zero-apps edge case (users with no matching group in the aggregation output), returning 0/0 as verified.",
+    "server.py:936-939 — projection correctly excludes _id, password_hash, and large media fields (portfolio_photos/videos, cover_photo) from the /admin/users list response — keeps payload small and secure."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_users_aggregation.py (new — 9 tests, all pass)",
+    "/app/test_reports/pytest/iteration_6_results.xml (new — JUnit XML)"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 aggregation + regression tests passed)",
+    "frontend": "not tested this iteration (backend-only request per main agent)"
+  },
+  "seed_data_creation": "Created 3 throwaway TEST_agg_* users (TEST_agg_A_*, TEST_agg_B_*, TEST_agg_C_*@example.com) with random 8-char UUID suffixes. Created 3 non-draft applications and 2 drafts against event 'Miss & Mr Teen India 2026'. Mock-verified 1 payment for user A. Session-scoped autouse cleanup fixture attempts to DELETE all TEST_agg_* users at end of run via /api/admin/users/{uid} (best-effort).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Public base URL: https://glamour-audition.preview.emergentagent.com. Run tests with EXPO_PUBLIC_BACKEND_URL exported (or EXPO_BACKEND_URL). The /admin/users endpoint now uses a single $group aggregation instead of per-user count_documents; response contract preserved (application_count + paid_count as integers per user). Actual admin-stats endpoint is /admin/analytics, not /admin/stats. Payment marking in tests uses POST /api/payments/verify with {application_id, mock: true} which sets payment_status='paid'. Duplicate non-draft applications per (user, event) are blocked by server, so tests use 1 non-draft + 1 draft per user against a single event — that's sufficient to validate the aggregation branches.",
+  "rca_of_issue": "N/A — the aggregation optimization is functionally correct. Verified via 9 backend tests against the public URL, all green on first run (one setup-time env-var wrapper fix aside)."
+}
