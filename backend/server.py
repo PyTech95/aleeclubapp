@@ -937,11 +937,31 @@ async def admin_users(user: dict = Depends(require_admin)):
         {},
         {"_id": 0, "password_hash": 0, "portfolio_photos": 0, "portfolio_videos": 0, "cover_photo": 0}
     ).sort("created_at", -1).to_list(500)
-    # Attach lightweight stats per user
+    # Batch-count applications per user in a single aggregation to avoid N+1
+    user_ids = [it.get("id") for it in items if it.get("id")]
+    counts_map: dict = {}
+    if user_ids:
+        pipeline = [
+            {"$match": {"user_id": {"$in": user_ids}}},
+            {"$group": {
+                "_id": "$user_id",
+                "application_count": {
+                    "$sum": {"$cond": [{"$ne": ["$is_draft", True]}, 1, 0]}
+                },
+                "paid_count": {
+                    "$sum": {"$cond": [{"$eq": ["$payment_status", "paid"]}, 1, 0]}
+                },
+            }},
+        ]
+        async for row in db.applications.aggregate(pipeline):
+            counts_map[row["_id"]] = {
+                "application_count": row.get("application_count", 0),
+                "paid_count": row.get("paid_count", 0),
+            }
     for it in items:
-        uid = it.get("id")
-        it["application_count"] = await db.applications.count_documents({"user_id": uid, "is_draft": False})
-        it["paid_count"] = await db.applications.count_documents({"user_id": uid, "payment_status": "paid"})
+        stats = counts_map.get(it.get("id"), {})
+        it["application_count"] = stats.get("application_count", 0)
+        it["paid_count"] = stats.get("paid_count", 0)
     return items
 
 
