@@ -13,7 +13,7 @@
 
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aleeclub.app",
+      "bundleIdentifier": "app.emergent.glamourauditiond672af65",
       "buildNumber": "5",
       "infoPlist": {
         "NSCameraUsageDescription": "Capture audition photos and videos",
