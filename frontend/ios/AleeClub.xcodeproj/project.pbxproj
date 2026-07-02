@@ -259,7 +259,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.AleeClub;
+				PRODUCT_BUNDLE_IDENTIFIER = app.emergent.glamourauditiond672af65;
 				PRODUCT_NAME = AleeClub;
 				SWIFT_OBJC_BRIDGING_HEADER = "AleeClub/AleeClub-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -286,7 +286,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.AleeClub;
+				PRODUCT_BUNDLE_IDENTIFIER = app.emergent.glamourauditiond672af65;
 				PRODUCT_NAME = AleeClub;
 				SWIFT_OBJC_BRIDGING_HEADER = "AleeClub/AleeClub-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
