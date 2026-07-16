@@ -208,43 +208,57 @@ class PhoneVerifyReq(BaseModel):
 _OTP_FIXED = "123456"
 
 
-class GoogleSessionReq(BaseModel):
-    session_id: str
+class GoogleAuthReq(BaseModel):
+    credential: str  # Google idToken from @react-native-google-signin/google-signin
 
 
-@api.post("/auth/google/session")
-async def google_session(body: GoogleSessionReq):
+@api.post("/auth/google")
+async def google_auth(body: GoogleAuthReq):
     """
-    Exchange an Emergent OAuth session_id for our app JWT token.
-    Frontend sends the session_id returned by https://auth.emergentagent.com after Google sign-in.
-    We call Emergent's session-data API to verify and fetch the user's profile, then upsert
-    a user record in MongoDB and return our existing { token, user } shape.
+    Verify a Google idToken received from the native Google Sign-In SDK
+    (@react-native-google-signin/google-signin) and issue our app JWT.
+
+    Accepted audiences: any of our configured Google OAuth client IDs
+    (Web / Android / iOS) — set in backend/.env.
     """
-    sid = (body.session_id or "").strip()
-    if not sid:
-        raise HTTPException(400, "Missing session_id")
-    import httpx
+    token_str = (body.credential or "").strip()
+    if not token_str:
+        raise HTTPException(400, "Missing Google credential")
+
+    web_cid = os.environ.get("GOOGLE_WEB_CLIENT_ID", "").strip()
+    ios_cid = os.environ.get("GOOGLE_IOS_CLIENT_ID", "").strip()
+    android_cid = os.environ.get("GOOGLE_ANDROID_CLIENT_ID", "").strip()
+    allowed_audiences = {c for c in (web_cid, ios_cid, android_cid) if c}
+    if not allowed_audiences:
+        raise HTTPException(500, "Google OAuth client IDs not configured on server")
+
+    # Verify signature + expiry using google-auth. Audience check is manual to allow multi-client.
     try:
-        async with httpx.AsyncClient(timeout=15.0) as cx:
-            resp = await cx.get(
-                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-                headers={"X-Session-ID": sid},
-            )
-        if resp.status_code != 200:
-            logger.warning(f"Google session-data failed: {resp.status_code} {resp.text[:200]}")
-            raise HTTPException(401, "Invalid or expired Google session")
-        data = resp.json()
-    except HTTPException:
-        raise
+        from google.oauth2 import id_token as g_id_token
+        from google.auth.transport import requests as g_requests
+        req = g_requests.Request()
+        # Passing audience=None skips the aud check inside verify_oauth2_token; we check below.
+        claims = g_id_token.verify_oauth2_token(token_str, req, audience=None)
     except Exception as e:
-        logger.error(f"Google session lookup error: {e}")
-        raise HTTPException(500, "Failed to verify Google session")
+        logger.warning(f"Google idToken verify failed: {e}")
+        raise HTTPException(401, "Invalid or expired Google token")
 
-    email = (data.get("email") or "").lower().strip()
-    name = data.get("name") or "Star"
-    picture = data.get("picture") or ""
+    iss = claims.get("iss", "")
+    if iss not in ("accounts.google.com", "https://accounts.google.com"):
+        raise HTTPException(401, "Invalid Google token issuer")
+    aud = claims.get("aud", "")
+    if aud not in allowed_audiences:
+        logger.warning(f"Google idToken aud mismatch: {aud}")
+        raise HTTPException(401, "Google token audience mismatch")
+
+    email = (claims.get("email") or "").lower().strip()
+    email_verified = bool(claims.get("email_verified"))
+    name = claims.get("name") or claims.get("given_name") or "Star"
+    picture = claims.get("picture") or ""
     if not email:
         raise HTTPException(400, "Google profile missing email")
+    if not email_verified:
+        raise HTTPException(401, "Google email not verified")
 
     user = await db.users.find_one({"email": email})
     if not user:
@@ -270,14 +284,13 @@ async def google_session(body: GoogleSessionReq):
         await db.users.insert_one(doc)
         user = doc
     else:
-        # If Google profile has picture and user has no profile_photo set, fill it in
         upd = {}
         if picture and not user.get("profile_photo"):
             upd["profile_photo"] = picture
         if name and not user.get("name"):
             upd["name"] = name
         if not user.get("auth_provider"):
-            upd["auth_provider"] = user.get("auth_provider") or "google"
+            upd["auth_provider"] = "google"
         if upd:
             await db.users.update_one({"id": user["id"]}, {"$set": upd})
             user.update(upd)

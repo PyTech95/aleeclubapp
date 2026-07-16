@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert, TextInput,
+  View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,7 +10,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import GoldButton from '../../src/components/GoldButton';
 import LuxInput from '../../src/components/LuxInput';
 import { theme } from '../../src/theme';
-import { startGoogleSignIn, exchangeSessionId } from '../../src/utils/googleAuth';
+import { configureGoogleSignIn, signInWithGoogle } from '../../src/utils/googleAuth';
 
 type Tab = 'phone' | 'email';
 type EmailMode = 'signin' | 'signup' | 'forgot' | 'reset';
@@ -45,13 +45,22 @@ export default function AuthScreen() {
   const [showResetPwd, setShowResetPwd] = useState(false);
   const [info, setInfo] = useState('');
 
+  useEffect(() => {
+    // Configure the native Google Sign-In SDK once when this screen mounts
+    configureGoogleSignIn();
+  }, []);
+
   const switchTab = (t: Tab) => {
     setTab(t);
     setErr('');
     setInfo('');
   };
 
-  // ============ PHONE FLOW (unchanged behavior) ============
+  const routeAfterLogin = (u: any) => {
+    router.replace(u?.role === 'admin' ? '/admin' : '/(tabs)/home');
+  };
+
+  // ============ PHONE FLOW ============
   const sendOtp = async () => {
     setErr('');
     if (!phone.trim() || phone.trim().length < 6) { setErr('Enter a valid phone number'); return; }
@@ -73,7 +82,7 @@ export default function AuthScreen() {
       const { data } = await api.post('/auth/phone/verify', { phone: phone.trim(), code: otp.trim(), name, city });
       await setToken(data.token);
       setUser(data.user);
-      router.replace(data.user?.role === 'admin' ? '/admin' : '/(tabs)/home');
+      routeAfterLogin(data.user);
     } catch (e: any) {
       setErr(e?.response?.data?.detail || 'Invalid OTP');
     } finally { setLoading(false); }
@@ -88,7 +97,7 @@ export default function AuthScreen() {
       const { data } = await api.post('/auth/login', { email: eEmail.trim().toLowerCase(), password: ePassword });
       await setToken(data.token);
       setUser(data.user);
-      router.replace(data.user?.role === 'admin' ? '/admin' : '/(tabs)/home');
+      routeAfterLogin(data.user);
     } catch (e: any) {
       setErr(e?.response?.data?.detail || 'Invalid email or password');
     } finally { setLoading(false); }
@@ -112,7 +121,7 @@ export default function AuthScreen() {
       });
       await setToken(data.token);
       setUser(data.user);
-      router.replace('/(tabs)/home');
+      routeAfterLogin(data.user);
     } catch (e: any) {
       setErr(e?.response?.data?.detail || 'Sign up failed');
     } finally { setLoading(false); }
@@ -124,7 +133,6 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/forgot-password', { email: eEmail.trim().toLowerCase() });
-      // For MVP the backend returns the token directly; in production this comes via email.
       if (data.reset_token) {
         setResetToken(data.reset_token);
         setInfo(`Reset code: ${data.reset_token}  (use it below to set a new password)`);
@@ -158,24 +166,25 @@ export default function AuthScreen() {
     } finally { setLoading(false); }
   };
 
-  // ============ GOOGLE ============
-  const googleSignIn = async () => {
+  // ============ GOOGLE (native) ============
+  const onGooglePress = async () => {
     setErr('');
     setLoading(true);
     try {
-      const sid = await startGoogleSignIn();
-      if (sid) {
-        const data = await exchangeSessionId(sid);
-        setUser(data.user);
-        router.replace(data.user?.role === 'admin' ? '/admin' : '/(tabs)/home');
+      const result = await signInWithGoogle();
+      if (!result) {
+        // User cancelled — silent, no error
+        return;
       }
+      setUser(result.user);
+      routeAfterLogin(result.user);
     } catch (e: any) {
-      setErr(e?.response?.data?.detail || e?.message || 'Google sign-in failed');
-    } finally { setLoading(false); }
-  };
-
-  const socialMock = (provider: string) => {
-    Alert.alert(`${provider} Sign-In`, `${provider} login coming soon. For now please use phone OTP, Google, or email.`);
+      const detail = e?.response?.data?.detail;
+      const msg = detail || e?.message || 'Google sign-in failed';
+      setErr(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ============ RENDER ============
@@ -320,26 +329,22 @@ export default function AuthScreen() {
             </View>
           )}
 
-          {/* ============ SOCIAL CONTINUE (visible only on entry sub-modes) ============ */}
+          {/* ============ GOOGLE CONTINUE (only on entry sub-modes) ============ */}
           {((tab === 'phone' && phoneStep === 'phone') || (tab === 'email' && emailMode === 'signin')) && (
             <>
               <View style={styles.divider}>
                 <View style={styles.line} /><Text style={styles.dividerTxt}>OR CONTINUE WITH</Text><View style={styles.line} />
               </View>
-              <TouchableOpacity style={styles.googleBtn} onPress={googleSignIn} disabled={loading} testID="social-google" activeOpacity={0.85}>
+              <TouchableOpacity
+                style={styles.googleBtn}
+                onPress={onGooglePress}
+                disabled={loading}
+                testID="social-google"
+                activeOpacity={0.85}
+              >
                 <FontAwesome name="google" size={18} color="#fff" />
                 <Text style={styles.googleTxt}>Continue with Google</Text>
               </TouchableOpacity>
-              <View style={styles.socials}>
-                <TouchableOpacity style={styles.socBtn} onPress={() => socialMock('Apple')} testID="social-apple">
-                  <FontAwesome name="apple" size={20} color="#fff" />
-                  <Text style={styles.socTxt}>Apple</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socBtn} onPress={() => socialMock('Facebook')} testID="social-fb">
-                  <FontAwesome name="facebook" size={18} color="#fff" />
-                  <Text style={styles.socTxt}>Facebook</Text>
-                </TouchableOpacity>
-              </View>
             </>
           )}
 
@@ -398,9 +403,6 @@ const styles = StyleSheet.create({
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 22 },
   line: { flex: 1, height: 1, backgroundColor: theme.border },
   dividerTxt: { color: theme.textMuted, fontSize: 10, letterSpacing: 2, fontWeight: '600' },
-  socials: { flexDirection: 'row', gap: 10, marginTop: 10 },
-  socBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: theme.border, backgroundColor: 'rgba(255,255,255,0.04)' },
-  socTxt: { color: theme.white, fontSize: 13, fontWeight: '600' },
   googleBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, paddingVertical: 15, borderRadius: 14, borderWidth: 1, borderColor: theme.borderGold, backgroundColor: 'rgba(212,175,55,0.08)' },
   googleTxt: { color: theme.white, fontSize: 14, fontWeight: '600', letterSpacing: 0.4 },
   resend: { color: theme.gold, fontSize: 13, letterSpacing: 0.5, fontWeight: '600' },

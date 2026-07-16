@@ -1,108 +1,108 @@
-import { Platform, Linking } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
-import * as ExpoLinking from 'expo-linking';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { api, setToken } from '../api';
 
 /**
- * Emergent-managed Google OAuth helper.
+ * Native Google Sign-In helper using @react-native-google-signin/google-signin.
  *
  * Flow:
- *   1. Build a platform-specific redirect URL.
- *   2. Open https://auth.emergentagent.com/?redirect=<encoded>.
- *   3. On return, parse `session_id` from the URL.
- *   4. POST it to our backend `/auth/google/session` which returns { token, user }
- *      in the SAME shape used by the phone OTP flow.
- */
-
-const EMERGENT_AUTH_URL = 'https://auth.emergentagent.com/';
-
-export function buildRedirectUrl(): string {
-  if (Platform.OS === 'web') {
-    // On web we must redirect back to an existing route — root '/' is safest.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w: any = (globalThis as any).window;
-    return `${w.location.origin}/`;
-  }
-  // Native (Expo Go / production) — generates either exp://<host>/--/auth or <scheme>://auth
-  return ExpoLinking.createURL('auth');
-}
-
-export function buildAuthUrl(redirectUrl: string): string {
-  return `${EMERGENT_AUTH_URL}?redirect=${encodeURIComponent(redirectUrl)}`;
-}
-
-/**
- * Extract session_id from a URL's hash fragment (#session_id=...) or query (?session_id=...).
- */
-export function extractSessionIdFromUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    // Hash fragment first
-    const hashIdx = url.indexOf('#');
-    if (hashIdx >= 0) {
-      const hash = url.substring(hashIdx + 1);
-      const params = new URLSearchParams(hash);
-      const sid = params.get('session_id');
-      if (sid) return sid;
-    }
-    // Query string
-    const qIdx = url.indexOf('?');
-    if (qIdx >= 0) {
-      const qs = url.substring(qIdx + 1).split('#')[0];
-      const params = new URLSearchParams(qs);
-      const sid = params.get('session_id');
-      if (sid) return sid;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-/**
- * Exchange the Emergent session_id for our backend JWT token.
- * Returns the upserted user record.
- */
-export async function exchangeSessionId(sessionId: string) {
-  const { data } = await api.post('/auth/google/session', { session_id: sessionId });
-  if (data?.token) {
-    await setToken(data.token);
-  }
-  return data; // { token, user }
-}
-
-/**
- * Kick off Google sign-in. On web this triggers a full-page redirect.
- * On native this opens an in-app browser and resolves with the redirected URL.
+ *   1. GoogleSignin.hasPlayServices() (Android only, no-op on iOS)
+ *   2. GoogleSignin.signIn() → returns idToken
+ *   3. POST /api/auth/google { credential: idToken } → { token, user }
+ *   4. Persist JWT in AsyncStorage and return the user record.
  *
- * On native we return the `session_id` (if found) so the caller can finish
- * the exchange immediately. On web this function never resolves because the
- * page navigates away — handle the `session_id` parsing in your root layout.
+ * NOTE: Requires a custom dev/prod build (not Expo Go).
  */
-export async function startGoogleSignIn(): Promise<string | null> {
-  const redirectUrl = buildRedirectUrl();
-  const authUrl = buildAuthUrl(redirectUrl);
 
-  if (Platform.OS === 'web') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w: any = (globalThis as any).window;
-    w.location.href = authUrl;
-    return null;
+let configured = false;
+
+export function configureGoogleSignIn(): void {
+  if (configured) return;
+  const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+  const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+  if (!webClientId) {
+    // Fail loudly at configure-time so we don't ship broken auth.
+    // eslint-disable-next-line no-console
+    console.warn('[GoogleSignIn] EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID is not set');
+  }
+  GoogleSignin.configure({
+    webClientId: webClientId || '',
+    iosClientId: iosClientId || undefined,
+    offlineAccess: false,
+    forceCodeForRefreshToken: false,
+  });
+  configured = true;
+}
+
+export type GoogleSignInResult = {
+  token: string;
+  user: any;
+};
+
+/**
+ * Kick off the native Google Sign-In flow and exchange the idToken with our backend.
+ * Returns { token, user } on success. Returns `null` if the user cancelled.
+ * Throws for any other error (network, invalid token, backend rejection, etc.).
+ */
+export async function signInWithGoogle(): Promise<GoogleSignInResult | null> {
+  configureGoogleSignIn();
+
+  try {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  } catch (e: any) {
+    if (e?.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      throw new Error('Google Play Services are not available on this device');
+    }
+    throw e;
   }
 
-  const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-  if (result.type !== 'success' || !result.url) return null;
-  return extractSessionIdFromUrl(result.url);
+  let userInfo: any;
+  try {
+    userInfo = await GoogleSignin.signIn();
+  } catch (e: any) {
+    // The library returns different shapes depending on version — handle both.
+    const code = e?.code;
+    if (
+      code === statusCodes.SIGN_IN_CANCELLED ||
+      code === statusCodes.IN_PROGRESS ||
+      code === 'SIGN_IN_CANCELLED'
+    ) {
+      return null;
+    }
+    if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      throw new Error('Google Play Services are not available on this device');
+    }
+    throw e;
+  }
+
+  // Locate idToken across the various response shapes used by v13+ / v16+.
+  const idToken: string | undefined =
+    userInfo?.idToken ||
+    userInfo?.data?.idToken ||
+    userInfo?.user?.idToken;
+
+  if (!idToken) {
+    throw new Error('Google did not return an ID token. Check your Web Client ID configuration.');
+  }
+
+  const { data } = await api.post('/auth/google', { credential: idToken });
+  if (!data?.token || !data?.user) {
+    throw new Error('Backend did not return a valid session');
+  }
+  await setToken(data.token);
+  return { token: data.token, user: data.user };
 }
 
 /**
- * Get the initial deep-link URL on cold start (mobile only).
+ * Sign the user out of Google (best-effort). Safe to call even if not signed in.
  */
-export async function getInitialDeepLink(): Promise<string | null> {
-  if (Platform.OS === 'web') return null;
+export async function signOutFromGoogle(): Promise<void> {
   try {
-    return await Linking.getInitialURL();
+    configureGoogleSignIn();
+    await GoogleSignin.signOut();
   } catch {
-    return null;
+    // ignore — Google session teardown is best-effort
   }
 }

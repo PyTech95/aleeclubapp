@@ -10,7 +10,6 @@
     "newArchEnabled": true,
     "primaryColor": "#D4AF37",
     "description": "India's premier beauty pageant & talent platform — auditions, portfolios and Miss & Mr Teen India events curated by Alee Club.",
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.emergent.glamourauditiond672af65",
@@ -23,7 +22,6 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-
     "android": {
       "package": "com.aleeclub.app",
       "versionCode": 8,
@@ -41,13 +39,11 @@
         "android.permission.ACCESS_NETWORK_STATE"
       ]
     },
-
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
       [
@@ -67,13 +63,12 @@
           "cameraPermission": "Capture audition photos and videos"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-google-signin/google-signin"
     ],
-
     "experiments": {
       "typedRoutes": true
     },
-
     "extra": {
       "router": {},
       "eas": {

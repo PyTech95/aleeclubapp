@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { api, setToken, getToken } from '../api';
-import { exchangeSessionId, extractSessionIdFromUrl } from '../utils/googleAuth';
+import { signOutFromGoogle } from '../utils/googleAuth';
 
 type User = {
   id: string;
@@ -29,31 +28,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     (async () => {
-      // Step 1 — On web, look for ?session_id / #session_id from Emergent Google redirect
-      // and exchange it for our JWT BEFORE checking any existing token.
-      if (Platform.OS === 'web') {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const w: any = (globalThis as any).window;
-          const fullUrl = `${w.location.pathname}${w.location.search}${w.location.hash}`;
-          const sid = extractSessionIdFromUrl(fullUrl);
-          if (sid) {
-            const data = await exchangeSessionId(sid);
-            if (data?.user) {
-              setUser(data.user);
-              // Clean the URL so refresh doesn't re-trigger
-              try { w.history.replaceState(null, '', w.location.pathname); } catch {}
-              setLoading(false);
-              return;
-            }
-          }
-        } catch (e) {
-          // fall through to normal token check
-          // eslint-disable-next-line no-console
-          console.warn('Google session exchange failed', e);
-        }
-      }
-
       const t = await getToken();
       if (t) {
         try {
@@ -80,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    await signOutFromGoogle();
     await setToken(null);
     setUser(null);
   };
@@ -89,7 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data } = await api.get('/auth/me');
       setUser(data);
     } catch {
-      // Likely 401 after logout / token expired — clear state silently
       setUser(null);
     }
   };
